@@ -1,3 +1,4 @@
+import Link from "next/link";
 import Logo from "./Logo";
 import { site } from "@/data/site";
 
@@ -25,32 +26,10 @@ export default function Footer() {
           </div>
         </div>
 
-        {/* Impressum — required by ZTD čl. 21 */}
-        <div className="border-t border-black/5 mt-6 pt-5">
-          <p className="font-sans text-[10px] tracking-[0.3em] uppercase text-co-charcoal/30 text-center mb-3">
-            Impressum
-          </p>
-          <dl className="mx-auto max-w-3xl grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1 font-sans text-xs text-co-charcoal/40 leading-relaxed">
-            {[
-              ["Tvrtka", site.company],
-              ["Sjedište", site.address],
-              ["OIB", site.oib],
-              ["Registarski sud", `${site.court}, MBS ${site.mbs}`],
-              ["Temeljni kapital", site.capital],
-              ["Član uprave", site.director],
-              ["Banka", site.bank],
-              ["IBAN", site.iban],
-            ].map(([label, value]) => (
-              <div key={label} className="flex gap-2">
-                <dt className="shrink-0 text-co-charcoal/25">{label}:</dt>
-                <dd>{value}</dd>
-              </div>
-            ))}
-          </dl>
-        </div>
-
-        <p className="font-sans text-xs text-co-charcoal/25 text-center mt-4">
-          &copy; {new Date().getFullYear()} {site.company} Sva prava pridržana.
+        <p className="font-sans text-xs text-co-charcoal/25 text-center mt-5">
+          &copy; {new Date().getFullYear()} {site.company} &middot; OIB {site.oib} &middot; Sva prava pridržana.
+          {" "}&middot;{" "}
+          <Link href="/impressum" className="hover:text-co-accent transition-colors">Impressum</Link>
         </p>
       </div>
     </footer>
