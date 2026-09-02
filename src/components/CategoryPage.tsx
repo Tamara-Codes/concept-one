@@ -50,7 +50,7 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-24 items-start">
             <div>
-              <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-red mb-4">
+              <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent mb-4">
                 {category.short}
               </p>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-co-charcoal leading-tight mb-8">
@@ -78,7 +78,7 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
               <ul className="divide-y divide-black/5 border-y border-black/5">
                 {category.features.map((f, i) => (
                   <li key={f} className="flex items-center gap-6 py-5">
-                    <span className="font-serif text-2xl font-light text-co-red/40 w-8">0{i + 1}</span>
+                    <span className="font-serif text-2xl font-light text-co-accent/40 w-8">0{i + 1}</span>
                     <span className="font-serif text-xl text-co-charcoal">{f}</span>
                   </li>
                 ))}
@@ -88,7 +88,7 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
                 <span className="text-co-charcoal/25">|</span>{" "}
                 <a
                   href={`mailto:${site.email}?subject=Upit – ${category.name}`}
-                  className="text-co-red hover:text-co-red-dark transition-colors"
+                  className="text-co-accent hover:text-co-accent-dark transition-colors"
                 >
                   Zatražite ponudu
                 </a>
@@ -101,7 +101,7 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
       {/* Other categories */}
       <section className="bg-co-warm py-14 lg:py-20">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
-          <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-red mb-8">
+          <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent mb-8">
             Pogledajte i
           </p>
           <div className="grid sm:grid-cols-3 gap-4">
@@ -135,7 +135,7 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
             <RevealPhoneButton
               phone={site.phone}
               display={site.phoneDisplay}
-              className="inline-flex items-center gap-3 bg-co-red hover:bg-co-red-dark text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
+              className="inline-flex items-center gap-3 bg-co-accent hover:bg-co-accent-dark text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
             />
             <a
               href={`mailto:${site.email}`}

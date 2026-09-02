@@ -1,30 +1,19 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;1,400;1,500&family=Manrope:wght@300;400;500;600;700&display=swap');
 @import "tailwindcss";
 
 @theme {
-  --color-co-red: #CC0000;
-  --color-co-red-dark: #A30000;
-  --color-co-charcoal: #2A2A2A;
-  --color-co-warm: #F7F5F2;
-  --color-co-warm-dark: #EDE9E3;
-  --color-co-stone: #B8AFA6;
-  --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Outfit', system-ui, sans-serif;
+  --color-co-accent: #2A7F79;
+  --color-co-accent-dark: #1F625D;
+  --color-co-charcoal: #1E2326;
+  --color-co-warm: #F3F4F2;
+  --color-co-warm-dark: #E4E7E3;
+  --color-co-stone: #A9B1AD;
+  --font-serif: 'Playfair Display', Georgia, serif;
+  --font-sans: 'Manrope', system-ui, sans-serif;
 }
 
-/* Custom cursor — desktop only */
 html {
   scroll-behavior: smooth;
-}
-
-@media (pointer: fine) {
-  html {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%23CC0000' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23CC0000'/%3E%3C/svg%3E") 10 10, auto;
-  }
-
-  a, button, [role="button"] {
-    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23CC0000' fill-opacity='0.15'/%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%23CC0000' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='2.5' fill='%23CC0000'/%3E%3C/svg%3E") 12 12, pointer;
-  }
 }
 
 body {
@@ -85,7 +74,7 @@ body {
   display: block;
   width: 60px;
   height: 2px;
-  background: var(--color-co-red);
+  background: var(--color-co-accent);
   margin-top: 1rem;
 }
 
@@ -94,6 +83,6 @@ body {
   display: block;
   width: 60px;
   height: 2px;
-  background: var(--color-co-red);
+  background: var(--color-co-accent);
   margin: 1rem auto 0;
 }

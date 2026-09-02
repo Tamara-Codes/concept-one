@@ -21,7 +21,7 @@ export default function RevealPhoneButton({
     return (
       <a
         href={`tel:${phone}`}
-        className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-co-red hover:text-co-red-dark transition-colors duration-300"
+        className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-co-accent hover:text-co-accent-dark transition-colors duration-300"
       >
         {display}
       </a>

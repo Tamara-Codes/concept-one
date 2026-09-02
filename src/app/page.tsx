@@ -10,12 +10,6 @@ const ArrowIcon = () => (
   </svg>
 );
 
-const highlights = [
-  { badge: "Izmjera", title: "Besplatna izmjera", description: "Dolazimo na objekt, mjerimo i savjetujemo bez naknade." },
-  { badge: "Montaža", title: "Stručna ugradnja", description: "Vlastiti montažni timovi za sve naše proizvode." },
-  { badge: "Ponuda", title: "Ponuda u 48 sati", description: "Brza i transparentna ponuda prilagođena vašem projektu." },
-];
-
 export default function HomePage() {
   return (
     <main className="min-h-screen">
@@ -42,7 +36,7 @@ export default function HomePage() {
           <h1 className="animate-fade-up delay-100 font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-white leading-[0.95] mb-6">
             Concept
             <br />
-            <span className="text-co-red font-medium italic">One</span>
+            <span className="text-co-accent font-medium italic">One</span>
           </h1>
           <p className="animate-fade-up delay-200 font-sans text-base md:text-lg text-white/70 max-w-xl leading-relaxed mb-10">
             Aluminijska bravarija, vrata, podovi i PU paneli. Sve za vaš
@@ -51,7 +45,7 @@ export default function HomePage() {
           <div className="animate-fade-up delay-300 flex flex-wrap gap-4">
             <Link
               href="/alubravarija"
-              className="inline-flex items-center gap-3 bg-co-red hover:bg-co-red-dark text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
+              className="inline-flex items-center gap-3 bg-co-accent hover:bg-co-accent-dark text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
             >
               Pogledajte ponudu
               <ArrowIcon />
@@ -70,37 +64,11 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ═══════════════ HIGHLIGHT STRIP ═══════════════ */}
-      <section className="relative bg-co-charcoal overflow-hidden">
-        <div
-          className="absolute inset-0 opacity-[0.03]"
-          style={{ backgroundImage: "repeating-linear-gradient(135deg, transparent, transparent 10px, white 10px, white 11px)" }}
-        />
-        <div className="relative max-w-7xl mx-auto px-6 lg:px-12 py-8 lg:py-14">
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-6 lg:gap-12">
-            {highlights.map((item, i) => (
-              <div key={i} className="group flex gap-4 items-start">
-                <span className="flex-shrink-0 font-sans text-[10px] sm:text-[11px] font-semibold tracking-[0.2em] uppercase text-white bg-co-red px-2.5 py-1.5 sm:px-3 sm:py-2 mt-1">
-                  {item.badge}
-                </span>
-                <div>
-                  <h3 className="font-serif text-lg sm:text-xl lg:text-2xl text-white font-medium leading-tight mb-1.5">
-                    {item.title}
-                  </h3>
-                  <p className="font-sans text-sm text-white/50 leading-relaxed">{item.description}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-        <div className="h-0.5 bg-gradient-to-r from-transparent via-co-red/50 to-transparent" />
-      </section>
-
       {/* ═══════════════ CATEGORIES ═══════════════ */}
       <section className="py-14 sm:py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-10 sm:mb-16 lg:mb-20">
-            <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-red mb-3">
+            <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent mb-3">
               Naš asortiman
             </p>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-co-charcoal leading-tight">
@@ -125,7 +93,7 @@ export default function HomePage() {
                   className="object-cover transition-transform duration-700 group-hover:scale-105"
                 />
                 <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/20 to-transparent" />
-                <div className="absolute inset-0 bg-co-red/0 group-hover:bg-co-red/10 transition-colors duration-500" />
+                <div className="absolute inset-0 bg-co-accent/0 group-hover:bg-co-accent/10 transition-colors duration-500" />
 
                 <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 lg:p-10">
                   <p className="font-sans text-[10px] tracking-[0.3em] uppercase text-white/50 mb-2">
@@ -153,7 +121,7 @@ export default function HomePage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
             <div>
-              <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-red mb-4">
+              <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent mb-4">
                 O nama
               </p>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-white leading-tight mb-6">
@@ -173,7 +141,7 @@ export default function HomePage() {
                   ["100%", "Po mjeri"],
                 ].map(([n, label]) => (
                   <div key={label}>
-                    <p className="font-serif text-3xl sm:text-4xl font-light text-co-red">{n}</p>
+                    <p className="font-serif text-3xl sm:text-4xl font-light text-co-accent">{n}</p>
                     <p className="font-sans text-[10px] sm:text-xs tracking-widest uppercase text-white/40 mt-1">{label}</p>
                   </div>
                 ))}
@@ -210,7 +178,7 @@ export default function HomePage() {
             </p>
             <a
               href={`tel:${site.phone}`}
-              className="font-serif text-4xl sm:text-5xl md:text-6xl font-light text-co-charcoal hover:text-co-red transition-colors duration-300"
+              className="font-serif text-4xl sm:text-5xl md:text-6xl font-light text-co-charcoal hover:text-co-accent transition-colors duration-300"
             >
               {site.phoneDisplay}
             </a>
