@@ -31,8 +31,6 @@ export default function Footer() {
             {site.legalName}
             <br />
             {site.address} &middot; OIB: {site.oib} &middot; MB: {site.mb}
-            <br />
-            Član uprave: {site.director} &middot; Temeljni kapital: {site.capital} &middot; {site.court}
           </p>
         </div>
 
