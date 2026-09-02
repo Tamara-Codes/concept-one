@@ -11,7 +11,7 @@ Built with Next.js 16 + Tailwind 4, same stack and design as the `kerri` site.
 ## Status — dummy / work in progress
 
 - Photos in `public/images/pages/` are borrowed from kerri (one per page). Replace them.
-- Contact details, company name and addresses in `src/data/site.ts` are placeholders.
+- Owner: INNOVA PROJEKT d.o.o., Ćikovići 128, 51215 Kastav, OIB 51970776577 (from public registers). Phone, email and social links in `src/data/site.ts` are still placeholders.
 - Category texts and feature lists live in `src/data/site.ts`.
 - The map on `/o-nama` is a placeholder box.
 

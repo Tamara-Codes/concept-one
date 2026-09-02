@@ -141,7 +141,19 @@ export default function ONamaPage() {
                   <p className="font-sans text-base text-white/70">
                     {site.company}
                     <br />
-                    {site.address}
+                    {site.street}
+                    <br />
+                    {site.city}
+                  </p>
+                </div>
+                <div>
+                  <p className="font-sans text-xs tracking-widest uppercase text-white/40 mb-2">Podaci o tvrtki</p>
+                  <p className="font-sans text-base text-white/70">
+                    OIB: {site.oib}
+                    <br />
+                    MB: {site.mb}
+                    <br />
+                    Član uprave: {site.director}
                   </p>
                 </div>
                 <div>

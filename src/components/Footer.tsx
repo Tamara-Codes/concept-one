@@ -25,7 +25,18 @@ export default function Footer() {
           </div>
         </div>
 
-        <p className="font-sans text-xs text-co-charcoal/25 text-center mt-5">
+        {/* Legal / impressum */}
+        <div className="border-t border-black/5 mt-6 pt-5 text-center font-sans text-xs text-co-charcoal/35 leading-relaxed">
+          <p>
+            {site.legalName}
+            <br />
+            {site.address} &middot; OIB: {site.oib} &middot; MB: {site.mb}
+            <br />
+            Član uprave: {site.director} &middot; Temeljni kapital: {site.capital} &middot; {site.court}
+          </p>
+        </div>
+
+        <p className="font-sans text-xs text-co-charcoal/25 text-center mt-4">
           &copy; {new Date().getFullYear()} {site.company} Sva prava pridržana.
         </p>
       </div>

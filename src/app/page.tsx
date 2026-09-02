@@ -37,7 +37,7 @@ export default function HomePage() {
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pb-20 lg:pb-28 w-full">
           <p className="animate-fade-up font-sans text-xs md:text-sm tracking-[0.3em] uppercase text-white/60 mb-4">
-            {site.company}
+            {site.company} &mdash; Kastav
           </p>
           <h1 className="animate-fade-up delay-100 font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-white leading-[0.95] mb-6">
             Concept

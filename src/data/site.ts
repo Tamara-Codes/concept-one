@@ -1,13 +1,23 @@
 // Central place for company info and categories.
-// TODO: replace placeholder contact details with real Concept One data.
+// Legal data from public registers (Fina info.BIZ / fininfo.hr), checked 2026-09-02.
+// TODO: phone, email and social links are still placeholders — not publicly listed.
 export const site = {
   name: "Concept One",
-  company: "Concept One d.o.o.",
+  company: "INNOVA PROJEKT d.o.o.",
+  legalName:
+    "INNOVA PROJEKT društvo s ograničenom odgovornošću za građevinarstvo i usluge",
   tagline: "Aluminij, vrata, podovi i paneli",
   phone: "+385910000000",
   phoneDisplay: "091 000 0000",
   email: "info@conceptone.hr",
-  address: "Ulica bb, 51000 Rijeka",
+  street: "Ćikovići 128",
+  city: "51215 Kastav",
+  address: "Ćikovići 128, 51215 Kastav",
+  oib: "51970776577",
+  mb: "05347653",
+  director: "Tomislav Milardović",
+  capital: "2.500,00 EUR (uplaćen u cijelosti)",
+  court: "Trgovački sud u Rijeci",
   facebook: "https://facebook.com/",
   instagram: "https://instagram.com/",
 };
