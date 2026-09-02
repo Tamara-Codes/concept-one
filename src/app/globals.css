@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,300;1,400&family=Outfit:wght@200;300;400;500;600&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --color-co-red: #CC0000;
+  --color-co-red-dark: #A30000;
+  --color-co-charcoal: #2A2A2A;
+  --color-co-warm: #F7F5F2;
+  --color-co-warm-dark: #EDE9E3;
+  --color-co-stone: #B8AFA6;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+  --font-sans: 'Outfit', system-ui, sans-serif;
+}
+
+/* Custom cursor — desktop only */
+html {
+  scroll-behavior: smooth;
+}
+
+@media (pointer: fine) {
+  html {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20' viewBox='0 0 20 20'%3E%3Ccircle cx='10' cy='10' r='8' fill='none' stroke='%23CC0000' stroke-width='1.5'/%3E%3Ccircle cx='10' cy='10' r='2' fill='%23CC0000'/%3E%3C/svg%3E") 10 10, auto;
+  }
+
+  a, button, [role="button"] {
+    cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='24' height='24' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='10' fill='%23CC0000' fill-opacity='0.15'/%3E%3Ccircle cx='12' cy='12' r='8' fill='none' stroke='%23CC0000' stroke-width='1.5'/%3E%3Ccircle cx='12' cy='12' r='2.5' fill='%23CC0000'/%3E%3C/svg%3E") 12 12, pointer;
+  }
+}
+
+body {
+  font-family: var(--font-sans);
+  color: var(--color-co-charcoal);
+  background: #fff;
+}
+
+/* Fade-in animation */
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInLeft {
+  from { opacity: 0; transform: translateX(-40px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.95); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.animate-fade-up {
+  animation: fadeUp 0.8s ease-out both;
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.6s ease-out both;
+}
+
+.animate-slide-left {
+  animation: slideInLeft 0.7s ease-out both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s ease-out both;
+}
+
+.delay-100 { animation-delay: 0.1s; }
+.delay-200 { animation-delay: 0.2s; }
+.delay-300 { animation-delay: 0.3s; }
+.delay-400 { animation-delay: 0.4s; }
+.delay-500 { animation-delay: 0.5s; }
+.delay-600 { animation-delay: 0.6s; }
+.delay-700 { animation-delay: 0.7s; }
+.delay-800 { animation-delay: 0.8s; }
+
+/* Elegant thin line separator */
+.line-accent::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: var(--color-co-red);
+  margin-top: 1rem;
+}
+
+.line-accent-center::after {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 2px;
+  background: var(--color-co-red);
+  margin: 1rem auto 0;
+}
