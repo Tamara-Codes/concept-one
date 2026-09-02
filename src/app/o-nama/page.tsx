@@ -147,16 +147,6 @@ export default function ONamaPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="font-sans text-xs tracking-widest uppercase text-white/40 mb-2">Podaci o tvrtki</p>
-                  <p className="font-sans text-base text-white/70">
-                    OIB: {site.oib}
-                    <br />
-                    MB: {site.mb}
-                    <br />
-                    Član uprave: {site.director}
-                  </p>
-                </div>
-                <div>
                   <p className="font-sans text-xs tracking-widest uppercase text-white/40 mb-2">Telefon</p>
                   <p className="font-sans text-base text-white/70">
                     <a href={`tel:${site.phone}`} className="hover:text-co-accent transition-colors">{site.phoneDisplay}</a>
