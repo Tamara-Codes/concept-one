@@ -45,7 +45,7 @@ export default function HomePage() {
           <div className="animate-fade-up delay-300 flex flex-wrap gap-4">
             <Link
               href="/alubravarija"
-              className="inline-flex items-center gap-3 bg-co-accent hover:bg-co-accent-dark text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
+              className="inline-flex items-center gap-3 bg-co-accent hover:bg-co-accent-dark text-co-charcoal hover:text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
             >
               Pogledajte ponudu
               <ArrowIcon />
@@ -68,7 +68,7 @@ export default function HomePage() {
       <section className="py-14 sm:py-20 lg:py-32">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-10 sm:mb-16 lg:mb-20">
-            <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent mb-3">
+            <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent-dark mb-3">
               Naš asortiman
             </p>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-co-charcoal leading-tight">
@@ -178,7 +178,7 @@ export default function HomePage() {
             </p>
             <a
               href={`tel:${site.phone}`}
-              className="font-serif text-4xl sm:text-5xl md:text-6xl font-light text-co-charcoal hover:text-co-accent transition-colors duration-300"
+              className="font-serif text-4xl sm:text-5xl md:text-6xl font-light text-co-charcoal hover:text-co-accent-dark transition-colors duration-300"
             >
               {site.phoneDisplay}
             </a>

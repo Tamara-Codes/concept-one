@@ -37,7 +37,7 @@ export default function Header() {
               <Link
                 key={link.href}
                 href={link.href}
-                className="font-sans text-sm font-medium tracking-widest uppercase text-co-charcoal/70 hover:text-co-accent transition-colors duration-300"
+                className="font-sans text-sm font-medium tracking-widest uppercase text-co-charcoal/70 hover:text-co-accent-dark transition-colors duration-300"
               >
                 {link.label}
               </Link>
@@ -47,7 +47,7 @@ export default function Header() {
           {/* Desktop phone */}
           <a
             href={`tel:${site.phone}`}
-            className="hidden lg:flex items-center gap-2 text-sm text-co-charcoal/60 hover:text-co-accent transition-colors"
+            className="hidden lg:flex items-center gap-2 text-sm text-co-charcoal/60 hover:text-co-accent-dark transition-colors"
           >
             <PhoneIcon />
             {site.phoneDisplay}
@@ -74,7 +74,7 @@ export default function Header() {
               key={link.href}
               href={link.href}
               onClick={() => setMenuOpen(false)}
-              className="font-sans text-sm font-medium tracking-widest uppercase text-co-charcoal/70 hover:text-co-accent transition-colors py-2.5"
+              className="font-sans text-sm font-medium tracking-widest uppercase text-co-charcoal/70 hover:text-co-accent-dark transition-colors py-2.5"
             >
               {link.label}
             </Link>
@@ -82,7 +82,7 @@ export default function Header() {
           <div className="border-t border-black/5 mt-2 pt-3">
             <a
               href={`tel:${site.phone}`}
-              className="inline-flex items-center gap-2 text-sm text-co-charcoal/60 hover:text-co-accent transition-colors py-2"
+              className="inline-flex items-center gap-2 text-sm text-co-charcoal/60 hover:text-co-accent-dark transition-colors py-2"
             >
               <PhoneIcon />
               {site.phoneDisplay}

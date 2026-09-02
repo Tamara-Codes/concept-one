@@ -49,7 +49,7 @@ export default function ONamaPage() {
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="grid lg:grid-cols-2 gap-10 lg:gap-24 items-start">
             <div>
-              <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent mb-4">
+              <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent-dark mb-4">
                 Naša priča
               </p>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-co-charcoal leading-tight mb-8">
@@ -91,7 +91,7 @@ export default function ONamaPage() {
                   ["100%", "Po mjeri"],
                 ].map(([n, label]) => (
                   <div key={label}>
-                    <p className="font-serif text-3xl sm:text-4xl font-light text-co-accent">{n}</p>
+                    <p className="font-serif text-3xl sm:text-4xl font-light text-co-accent-dark">{n}</p>
                     <p className="font-sans text-[10px] sm:text-xs tracking-widest uppercase text-co-charcoal/40 mt-1">{label}</p>
                   </div>
                 ))}
@@ -105,7 +105,7 @@ export default function ONamaPage() {
       <section className="bg-co-warm py-14 sm:py-20 lg:py-28">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
           <div className="text-center mb-14">
-            <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent mb-4">
+            <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent-dark mb-4">
               Zašto Concept One
             </p>
             <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-co-charcoal">
@@ -115,7 +115,7 @@ export default function ONamaPage() {
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
             {advantages.map((item, i) => (
               <div key={i} className="bg-white p-8 border border-black/5">
-                <p className="font-serif text-5xl font-light text-co-accent/20 mb-4">0{i + 1}</p>
+                <p className="font-serif text-5xl font-light text-co-accent-dark/25 mb-4">0{i + 1}</p>
                 <h3 className="font-serif text-xl font-medium text-co-charcoal mb-3">{item.title}</h3>
                 <p className="font-sans text-sm text-co-charcoal/50 leading-relaxed">{item.text}</p>
               </div>

@@ -30,7 +30,7 @@ export default function ImpressumPage() {
       <Header />
       <section className="pt-32 pb-20 lg:pt-40 lg:pb-28">
         <div className="max-w-3xl mx-auto px-6 lg:px-12">
-          <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent mb-4">
+          <p className="font-sans text-xs tracking-[0.3em] uppercase text-co-accent-dark mb-4">
             Podaci o tvrtki
           </p>
           <h1 className="font-serif text-4xl md:text-5xl font-light text-co-charcoal mb-10">
