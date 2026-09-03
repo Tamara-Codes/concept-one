@@ -74,28 +74,14 @@ export default function ONamaPage() {
               </div>
             </div>
 
-            <div className="space-y-8">
-              <div className="relative aspect-[4/3] overflow-hidden bg-co-warm">
-                <Image
-                  src="/images/pages/about.jpg"
-                  alt="Concept One"
-                  fill
-                  sizes="(min-width: 1024px) 50vw, 100vw"
-                  className="object-cover"
-                />
-              </div>
-              <div className="grid grid-cols-3 gap-4 sm:gap-6 text-center">
-                {[
-                  ["4", "Programa"],
-                  ["1", "Partner"],
-                  ["100%", "Po mjeri"],
-                ].map(([n, label]) => (
-                  <div key={label}>
-                    <p className="font-serif text-3xl sm:text-4xl font-light text-co-accent-dark">{n}</p>
-                    <p className="font-sans text-[10px] sm:text-xs tracking-widest uppercase text-co-charcoal/40 mt-1">{label}</p>
-                  </div>
-                ))}
-              </div>
+            <div className="relative aspect-[4/3] overflow-hidden bg-co-warm">
+              <Image
+                src="/images/pages/about.jpg"
+                alt="Concept One"
+                fill
+                sizes="(min-width: 1024px) 50vw, 100vw"
+                className="object-cover"
+              />
             </div>
           </div>
         </div>

@@ -30,10 +30,7 @@ export default function HomePage() {
         </div>
 
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pb-20 lg:pb-28 w-full">
-          <p className="animate-fade-up font-sans text-xs md:text-sm tracking-[0.3em] uppercase text-white/60 mb-4">
-            {site.company} &mdash; Kastav
-          </p>
-          <h1 className="animate-fade-up delay-100 font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-white leading-[0.95] mb-6">
+          <h1 className="animate-fade-up font-serif text-4xl sm:text-5xl md:text-7xl lg:text-8xl font-light text-white leading-[0.95] mb-6">
             Concept
             <br />
             <span className="text-co-accent font-medium italic">One</span>
@@ -134,18 +131,6 @@ export default function HomePage() {
                 PU panele pod jednim krovom. Od izmjere i savjetovanja do
                 isporuke i montaže — jedan tim, jedna odgovornost.
               </p>
-              <div className="grid grid-cols-3 gap-4 sm:gap-8">
-                {[
-                  ["4", "Programa"],
-                  ["1", "Partner"],
-                  ["100%", "Po mjeri"],
-                ].map(([n, label]) => (
-                  <div key={label}>
-                    <p className="font-serif text-3xl sm:text-4xl font-light text-co-accent">{n}</p>
-                    <p className="font-sans text-[10px] sm:text-xs tracking-widest uppercase text-white/40 mt-1">{label}</p>
-                  </div>
-                ))}
-              </div>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden">
               <Image
