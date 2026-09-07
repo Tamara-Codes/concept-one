@@ -2,7 +2,6 @@ import Image from "next/image";
 import Link from "next/link";
 import Header from "./Header";
 import Footer from "./Footer";
-import RevealPhoneButton from "./RevealPhoneButton";
 import { categories, site, type Category } from "@/data/site";
 
 interface CategoryPageProps {
@@ -84,14 +83,7 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
                 ))}
               </ul>
               <p className="font-sans text-sm text-co-charcoal/40 mt-6">
-                Cijene na upit{" "}
-                <span className="text-co-charcoal/25">|</span>{" "}
-                <a
-                  href={`mailto:${site.email}?subject=Upit – ${category.name}`}
-                  className="text-co-accent-dark hover:text-co-charcoal transition-colors"
-                >
-                  Zatražite ponudu
-                </a>
+                Cijene na upit
               </p>
             </div>
           </div>
@@ -126,23 +118,28 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
       <section className="bg-co-charcoal py-20 lg:py-24">
         <div className="max-w-3xl mx-auto px-6 text-center">
           <h2 className="font-serif text-3xl md:text-4xl font-light text-white mb-4">
-            Zainteresirani za <span className="italic font-medium">{category.name.toLowerCase()}</span>?
+            Zainteresirani?
           </h2>
           <p className="font-sans text-base text-white/50 mb-8 leading-relaxed">
             Kontaktirajte nas za stručno savjetovanje, izmjeru i ponudu.
           </p>
           <div className="flex flex-wrap justify-center gap-4">
-            <RevealPhoneButton
-              phone={site.phone}
-              display={site.phoneDisplay}
-              className="inline-flex items-center gap-3 bg-co-accent hover:bg-co-accent-dark text-co-charcoal hover:text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
-            />
-            <a
-              href={`mailto:${site.email}`}
-              className="inline-flex items-center gap-3 border border-white/30 hover:border-white/60 text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
-            >
-              Pošaljite upit
-            </a>
+            {site.contacts.map((contact) => (
+              <div key={contact.email} className="flex flex-col gap-2">
+                <a
+                  href={`tel:${contact.phone}`}
+                  className="inline-flex items-center justify-center bg-co-accent hover:bg-co-accent-dark text-co-charcoal hover:text-white px-6 py-3 sm:px-8 sm:py-4 text-xs sm:text-sm font-medium tracking-widest uppercase transition-all duration-300"
+                >
+                  {contact.name}: {contact.phoneDisplay}
+                </a>
+                <a
+                  href={`mailto:${contact.email}?subject=Upit – ${category.name}`}
+                  className="text-center font-sans text-sm text-white/60 hover:text-white transition-colors"
+                >
+                  {contact.email}
+                </a>
+              </div>
+            ))}
           </div>
         </div>
       </section>

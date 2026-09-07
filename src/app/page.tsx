@@ -157,16 +157,18 @@ export default function HomePage() {
           <p className="font-sans text-base text-co-charcoal/60 mb-10 leading-relaxed">
             Stojimo vam na raspolaganju za savjete, izmjeru i ponudu.
           </p>
-          <div className="flex flex-col items-center gap-3">
-            <p className="font-sans text-sm tracking-widest uppercase text-co-charcoal/50">
-              Nazovite nas
-            </p>
-            <a
-              href={`tel:${site.phone}`}
-              className="font-serif text-4xl sm:text-5xl md:text-6xl font-light text-co-charcoal hover:text-co-accent-dark transition-colors duration-300"
-            >
-              {site.phoneDisplay}
-            </a>
+          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 text-left">
+            {site.contacts.map((contact) => (
+              <div key={contact.email} className="border border-co-charcoal/10 bg-white/40 p-5 sm:p-6">
+                <p className="font-sans text-xs tracking-widest uppercase text-co-charcoal/50 mb-3">{contact.name}</p>
+                <a href={`tel:${contact.phone}`} className="block font-serif text-2xl sm:text-3xl font-light text-co-charcoal hover:text-co-accent-dark transition-colors duration-300">
+                  {contact.phoneDisplay}
+                </a>
+                <a href={`mailto:${contact.email}`} className="mt-2 inline-block font-sans text-sm text-co-charcoal/60 hover:text-co-accent-dark transition-colors">
+                  {contact.email}
+                </a>
+              </div>
+            ))}
           </div>
         </div>
       </section>

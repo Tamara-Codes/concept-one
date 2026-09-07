@@ -133,16 +133,17 @@ export default function ONamaPage() {
                   </p>
                 </div>
                 <div>
-                  <p className="font-sans text-xs tracking-widest uppercase text-white/40 mb-2">Telefon</p>
-                  <p className="font-sans text-base text-white/70">
-                    <a href={`tel:${site.phone}`} className="hover:text-co-accent transition-colors">{site.phoneDisplay}</a>
-                  </p>
-                </div>
-                <div>
-                  <p className="font-sans text-xs tracking-widest uppercase text-white/40 mb-2">Email</p>
-                  <p className="font-sans text-base text-white/70">
-                    <a href={`mailto:${site.email}`} className="hover:text-co-accent transition-colors">{site.email}</a>
-                  </p>
+                  <p className="font-sans text-xs tracking-widest uppercase text-white/40 mb-2">Kontakt</p>
+                  <div className="space-y-3 font-sans text-base text-white/70">
+                    {site.contacts.map((contact) => (
+                      <p key={contact.email}>
+                        <span className="text-white/40">{contact.name}: </span>
+                        <a href={`tel:${contact.phone}`} className="hover:text-co-accent transition-colors">{contact.phoneDisplay}</a>
+                        <span className="text-white/30"> · </span>
+                        <a href={`mailto:${contact.email}`} className="hover:text-co-accent transition-colors">{contact.email}</a>
+                      </p>
+                    ))}
+                  </div>
                 </div>
               </div>
             </div>

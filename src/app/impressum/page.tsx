@@ -20,8 +20,10 @@ const rows: [string, string][] = [
   ["Član uprave", site.director],
   ["Banka", site.bank],
   ["IBAN", site.iban],
-  ["E-mail", site.email],
-  ["Telefon", site.phoneDisplay],
+  ...site.contacts.flatMap((contact) => [
+    [`Telefon — ${contact.name}`, contact.phoneDisplay],
+    [`E-mail — ${contact.name}`, contact.email],
+  ] as [string, string][]),
 ];
 
 export default function ImpressumPage() {

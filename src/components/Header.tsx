@@ -44,14 +44,19 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Desktop phone */}
-          <a
-            href={`tel:${site.phone}`}
-            className="hidden lg:flex items-center gap-2 text-sm text-co-charcoal/60 hover:text-co-accent-dark transition-colors"
-          >
-            <PhoneIcon />
-            {site.phoneDisplay}
-          </a>
+          {/* Desktop contacts */}
+          <div className="hidden lg:flex flex-col items-end gap-0.5">
+            {site.contacts.map((contact) => (
+              <a
+                key={contact.phone}
+                href={`tel:${contact.phone}`}
+                className="flex items-center gap-2 text-xs text-co-charcoal/60 hover:text-co-accent-dark transition-colors"
+              >
+                <PhoneIcon />
+                {contact.name}: {contact.phoneDisplay}
+              </a>
+            ))}
+          </div>
 
           {/* Mobile hamburger */}
           <button
@@ -80,13 +85,18 @@ export default function Header() {
             </Link>
           ))}
           <div className="border-t border-black/5 mt-2 pt-3">
-            <a
-              href={`tel:${site.phone}`}
-              className="inline-flex items-center gap-2 text-sm text-co-charcoal/60 hover:text-co-accent-dark transition-colors py-2"
-            >
-              <PhoneIcon />
-              {site.phoneDisplay}
-            </a>
+            <div className="flex flex-col">
+              {site.contacts.map((contact) => (
+                <a
+                  key={contact.phone}
+                  href={`tel:${contact.phone}`}
+                  className="inline-flex items-center gap-2 text-sm text-co-charcoal/60 hover:text-co-accent-dark transition-colors py-2"
+                >
+                  <PhoneIcon />
+                  {contact.name}: {contact.phoneDisplay}
+                </a>
+              ))}
+            </div>
           </div>
         </nav>
       </div>
