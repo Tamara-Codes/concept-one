@@ -11,6 +11,9 @@ type Item = {
   price: number;
   discountPct: number;
   image: string | null;
+  dimensions: string;
+  showDimensions: boolean;
+  isSurcharge: boolean;
 };
 
 const PRESET_IMAGES = [
@@ -27,16 +30,42 @@ function money(n: number) {
 }
 
 function newItem(image: string | null = null): Item {
-  return { id: crypto.randomUUID(), desc: "", qty: 1, price: 0, discountPct: 0, image };
+  return {
+    id: crypto.randomUUID(),
+    desc: "",
+    qty: 1,
+    price: 0,
+    discountPct: 0,
+    image,
+    dimensions: "",
+    showDimensions: false,
+    isSurcharge: false,
+  };
+}
+
+function newSurchargeItem(): Item {
+  return {
+    id: crypto.randomUUID(),
+    desc: "",
+    qty: 1,
+    price: 0,
+    discountPct: 0,
+    image: null,
+    dimensions: "",
+    showDimensions: false,
+    isSurcharge: true,
+  };
 }
 
 export default function PonudaForm() {
-  const [offerNumber, setOfferNumber] = useState("PONUDA-2026-001");
+  const [offerNumber, setOfferNumber] = useState("001-2026");
   const [offerDate, setOfferDate] = useState(() => new Date().toLocaleDateString("hr-HR"));
   const [validUntil, setValidUntil] = useState("");
 
   const [clientName, setClientName] = useState("");
   const [clientAddress, setClientAddress] = useState("");
+  const [clientPhone, setClientPhone] = useState("");
+  const [clientEmail, setClientEmail] = useState("");
 
   const [coContact, setCoContact] = useState(
     `${site.contacts[0].name} · ${site.contacts[0].phoneDisplay}`
@@ -57,6 +86,9 @@ export default function PonudaForm() {
   }
   function addItem() {
     setItems((prev) => [...prev, newItem()]);
+  }
+  function addSurcharge() {
+    setItems((prev) => [...prev, newSurchargeItem()]);
   }
   function removeItem(id: string) {
     setItems((prev) => (prev.length > 1 ? prev.filter((it) => it.id !== id) : prev));
@@ -84,6 +116,12 @@ export default function PonudaForm() {
             className="text-sm font-medium px-4 py-2 rounded-md border border-co-charcoal/15 text-co-charcoal/80 hover:border-co-accent-dark hover:text-co-accent-dark transition-colors"
           >
             + Dodaj stavku
+          </button>
+          <button
+            onClick={addSurcharge}
+            className="text-sm font-medium px-4 py-2 rounded-md border border-[#b3261e]/30 text-[#b3261e] hover:border-[#b3261e] transition-colors"
+          >
+            + Dodaj nadoplatu
           </button>
           <button
             onClick={() => window.print()}
@@ -141,6 +179,18 @@ export default function PonudaForm() {
               onChange={(e) => setClientAddress(e.target.value)}
               className="field d3-clientline w-full mt-1"
             />
+            <input
+              placeholder="Telefon"
+              value={clientPhone}
+              onChange={(e) => setClientPhone(e.target.value)}
+              className="field d3-clientline w-full mt-1"
+            />
+            <input
+              placeholder="E-mail"
+              value={clientEmail}
+              onChange={(e) => setClientEmail(e.target.value)}
+              className="field d3-clientline w-full mt-1"
+            />
           </div>
           <div className="d3-right">
             <p className="d3-label">Va&scaron;a kontakt osoba</p>
@@ -169,33 +219,36 @@ export default function PonudaForm() {
         {/* Items */}
         <div className="d3-items">
           {items.map((it, i) => (
-            <div key={it.id} className="d3-row">
-              <div className="d3-photo-wrap">
-                <div className="d3-photo">
-                  {it.image ? (
-                    <img src={it.image} alt="" />
-                  ) : (
-                    <div className="d3-photo-empty" />
-                  )}
+            <div key={it.id} className={it.isSurcharge ? "d3-row d3-row-surcharge" : "d3-row"}>
+              {!it.isSurcharge && (
+                <div className="d3-photo-wrap">
+                  <div className="d3-photo">
+                    {it.image ? (
+                      <img src={it.image} alt="" />
+                    ) : (
+                      <div className="d3-photo-empty" />
+                    )}
+                  </div>
+                  <select
+                    className="no-print d3-photo-select"
+                    value={PRESET_IMAGES.find((p) => p.src === it.image)?.key ?? "none"}
+                    onChange={(e) =>
+                      updateItem(it.id, {
+                        image: PRESET_IMAGES.find((p) => p.key === e.target.value)?.src ?? null,
+                      })
+                    }
+                  >
+                    {PRESET_IMAGES.map((p) => (
+                      <option key={p.key} value={p.key}>
+                        {p.label}
+                      </option>
+                    ))}
+                  </select>
                 </div>
-                <select
-                  className="no-print d3-photo-select"
-                  value={PRESET_IMAGES.find((p) => p.src === it.image)?.key ?? "none"}
-                  onChange={(e) =>
-                    updateItem(it.id, {
-                      image: PRESET_IMAGES.find((p) => p.key === e.target.value)?.src ?? null,
-                    })
-                  }
-                >
-                  {PRESET_IMAGES.map((p) => (
-                    <option key={p.key} value={p.key}>
-                      {p.label}
-                    </option>
-                  ))}
-                </select>
-              </div>
+              )}
 
               <div className="d3-info">
+                {it.isSurcharge && <div className="d3-surchargetag">Nadoplata</div>}
                 <textarea
                   ref={(el) => {
                     if (el) {
@@ -209,17 +262,30 @@ export default function PonudaForm() {
                     e.target.style.height = "auto";
                     e.target.style.height = `${e.target.scrollHeight}px`;
                   }}
-                  placeholder="Opis proizvoda / usluge"
-                  rows={1}
-                  className="field d3-name w-full resize-none block overflow-hidden"
+                  placeholder={
+                    it.isSurcharge
+                      ? "Opis nadoplate (npr. nestandardna dimenzija)"
+                      : "Opis proizvoda / usluge"
+                  }
+                  rows={it.isSurcharge ? 1 : 3}
+                  className={
+                    it.isSurcharge
+                      ? "field d3-name d3-name-surcharge w-full resize-none block overflow-hidden"
+                      : "field d3-name w-full resize-none block overflow-hidden"
+                  }
                 />
                 <div className="d3-qty">
                   <div>
                     <span>Kol.</span>
                     <input
                       type="number"
+                      max={100}
                       value={it.qty}
-                      onChange={(e) => updateItem(it.id, { qty: parseFloat(e.target.value) || 0 })}
+                      onChange={(e) =>
+                        updateItem(it.id, {
+                          qty: Math.min(100, parseFloat(e.target.value) || 0),
+                        })
+                      }
                       className="field text-right"
                     />
                   </div>
@@ -244,10 +310,46 @@ export default function PonudaForm() {
                     />
                   </div>
                 </div>
+                {!it.isSurcharge && (
+                  <div className="d3-optional">
+                    {it.showDimensions ? (
+                      <div className="d3-dimensions">
+                        <span>Dimenzije</span>
+                        <div className="d3-dimensions-row">
+                          <input
+                            autoFocus
+                            value={it.dimensions}
+                            onChange={(e) => updateItem(it.id, { dimensions: e.target.value })}
+                            placeholder="npr. 95 x 210 x 18 cm"
+                            className="field"
+                          />
+                          <button
+                            onClick={() =>
+                              updateItem(it.id, { showDimensions: false, dimensions: "" })
+                            }
+                            className="no-print d3-remove-inline"
+                            aria-label="Ukloni dimenzije"
+                          >
+                            &times;
+                          </button>
+                        </div>
+                      </div>
+                    ) : (
+                      <button
+                        onClick={() => updateItem(it.id, { showDimensions: true })}
+                        className="no-print d3-adddim"
+                      >
+                        + Dimenzije
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
 
               <div className="d3-rowend">
-                <div className="d3-total">{money(lineTotals[i])}</div>
+                <div className={it.isSurcharge ? "d3-total d3-total-surcharge" : "d3-total"}>
+                  {money(lineTotals[i])}
+                </div>
                 <button
                   onClick={() => removeItem(it.id)}
                   className="no-print d3-remove"
@@ -456,9 +558,12 @@ export default function PonudaForm() {
           display: grid;
           grid-template-columns: 96px 1fr 110px;
           gap: 16px;
-          align-items: center;
+          align-items: start;
           padding: 14px 0;
           border-bottom: 1px solid var(--line);
+        }
+        .d3-row-surcharge {
+          grid-template-columns: 1fr 110px;
         }
         .d3-photo-wrap {
           display: flex;
@@ -520,6 +625,65 @@ export default function PonudaForm() {
         .d3-qty .field {
           font-size: 13px;
           font-variant-numeric: tabular-nums;
+        }
+        .d3-optional {
+          margin-top: 10px;
+        }
+        .d3-dimensions {
+          display: flex;
+          flex-direction: column;
+          max-width: 260px;
+        }
+        .d3-dimensions span {
+          font-size: 9px;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          color: var(--muted);
+          margin-bottom: 2px;
+        }
+        .d3-dimensions-row {
+          display: flex;
+          align-items: center;
+          gap: 6px;
+        }
+        .d3-remove-inline {
+          color: var(--muted);
+          opacity: 0.6;
+          font-size: 13px;
+          line-height: 1;
+        }
+        .d3-remove-inline:hover {
+          opacity: 1;
+          color: #b3261e;
+        }
+        .d3-dimensions .field {
+          font-size: 12px;
+          color: var(--ink);
+        }
+        .d3-adddim {
+          font-size: 10.5px;
+          color: var(--muted);
+          border-bottom: 1px dashed var(--line);
+          padding-bottom: 1px;
+        }
+        .d3-adddim:hover {
+          color: var(--accent);
+          border-bottom-color: var(--accent);
+        }
+        .d3-surchargetag {
+          font-size: 9.5px;
+          text-transform: uppercase;
+          letter-spacing: 0.14em;
+          color: #b3261e;
+          font-weight: 700;
+          margin-bottom: 4px;
+        }
+        .d3-name-surcharge {
+          color: #b3261e !important;
+          font-size: 14px !important;
+        }
+        .d3-total-surcharge {
+          color: #b3261e !important;
         }
         .d3-rowend {
           display: flex;
