@@ -74,6 +74,7 @@ export default function PonudaForm() {
 
   const [items, setItems] = useState<Item[]>([newItem("/images/pages/cat-vrata.jpg")]);
   const [discountPct, setDiscountPct] = useState(0);
+  const [showDiscount, setShowDiscount] = useState(false);
   const [vatRate, setVatRate] = useState(25);
 
   const [paymentTerms, setPaymentTerms] = useState(
@@ -368,19 +369,37 @@ export default function PonudaForm() {
             <span>Iznos bez PDV-a</span>
             <b>{money(subtotal)}</b>
           </div>
-          <div className="d3-subrow">
-            <span className="flex items-center gap-1">
-              Popust na ponudu
-              <input
-                type="number"
-                value={discountPct}
-                onChange={(e) => setDiscountPct(parseFloat(e.target.value) || 0)}
-                className="field w-10 text-right"
-              />
-              %
-            </span>
-            <b>&minus;{money(discountAmount)}</b>
-          </div>
+          {showDiscount ? (
+            <div className="d3-subrow">
+              <span className="flex items-center gap-1">
+                Popust na ponudu
+                <input
+                  type="number"
+                  value={discountPct}
+                  onChange={(e) => setDiscountPct(parseFloat(e.target.value) || 0)}
+                  className="field w-10 text-right"
+                />
+                %
+                <button
+                  onClick={() => {
+                    setShowDiscount(false);
+                    setDiscountPct(0);
+                  }}
+                  className="no-print d3-remove-inline"
+                  aria-label="Ukloni popust"
+                >
+                  &times;
+                </button>
+              </span>
+              <b>&minus;{money(discountAmount)}</b>
+            </div>
+          ) : (
+            <div className="d3-subrow no-print">
+              <button onClick={() => setShowDiscount(true)} className="d3-adddim">
+                + Popust na ponudu
+              </button>
+            </div>
+          )}
           <div className="d3-subrow">
             <span className="flex items-center gap-1">
               PDV
