@@ -183,12 +183,6 @@ export default function PonudaForm() {
         </a>
         <div className="flex items-center gap-3">
           <button
-            onClick={addItem}
-            className="text-sm font-medium px-4 py-2 rounded-md border border-co-charcoal/15 text-co-charcoal/80 hover:border-co-accent-dark hover:text-co-accent-dark transition-colors"
-          >
-            + Dodaj stavku
-          </button>
-          <button
             onClick={addSurcharge}
             className="text-sm font-medium px-4 py-2 rounded-md border border-[#b3261e]/30 text-[#b3261e] hover:border-[#b3261e] transition-colors"
           >
@@ -452,6 +446,17 @@ export default function PonudaForm() {
               </tr>
             ))}
           </tbody>
+          <tfoot className="no-print">
+            <tr>
+              <td colSpan={9} className="d3-addrow-cell">
+                <button onClick={addItem} className="d3-addrow" aria-label="Dodaj stavku" title="Dodaj stavku">
+                  <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
+                    <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tfoot>
         </table>
 
         {/* Totals */}
@@ -793,6 +798,28 @@ export default function PonudaForm() {
         }
         .d3-row-surcharge td {
           background: #fdf3f2;
+        }
+        .d3-addrow-cell {
+          border: 1px dashed var(--line) !important;
+          border-top: none !important;
+          padding: 6px !important;
+          text-align: center;
+        }
+        .d3-addrow {
+          width: 24px;
+          height: 24px;
+          display: inline-flex;
+          align-items: center;
+          justify-content: center;
+          border-radius: 6px;
+          color: var(--muted);
+          opacity: 0.75;
+          transition: background-color 0.15s, color 0.15s, opacity 0.15s;
+        }
+        .d3-addrow:hover {
+          opacity: 1;
+          color: var(--accent);
+          background: var(--panel);
         }
         .d3-total {
           font-weight: 600;
