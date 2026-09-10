@@ -660,32 +660,33 @@ export default function PonudaForm() {
           margin-top: 4px;
         }
         .d3-col-rbr {
-          width: 34px;
+          width: 30px;
         }
         .d3-col-img {
-          width: 72px;
+          width: 56px;
         }
         .d3-col-dim {
-          width: 120px;
+          width: 90px;
         }
         .d3-col-num {
-          width: 60px;
+          width: 66px;
         }
         .d3-col-total {
-          width: 96px;
+          width: 82px;
         }
         .d3-col-actions {
-          width: 44px;
+          width: 32px;
         }
         .d3-table th {
           background: var(--panel);
           color: var(--accent);
-          font-size: 9.5px;
+          font-size: 9px;
           text-transform: uppercase;
-          letter-spacing: 0.1em;
+          letter-spacing: 0.06em;
           font-weight: 700;
           text-align: left;
-          padding: 7px 8px;
+          padding: 7px 6px;
+          white-space: nowrap;
           border: 1px solid var(--line);
           border-bottom: 2px solid var(--ink);
         }
