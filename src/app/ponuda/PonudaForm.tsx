@@ -23,7 +23,7 @@ function newItem(): Item {
   return {
     id: crypto.randomUUID(),
     desc: "",
-    qty: 1,
+    qty: 0,
     price: 0,
     discountPct: 0,
     dimensions: "",
@@ -35,7 +35,7 @@ function newSurchargeItem(): Item {
   return {
     id: crypto.randomUUID(),
     desc: "",
-    qty: 1,
+    qty: 0,
     price: 0,
     discountPct: 0,
     dimensions: "",
@@ -271,6 +271,7 @@ export default function PonudaForm() {
         </div>
 
         {/* Items */}
+        <div className="d3-tablewrap">
         <table className="d3-table">
           <colgroup>
             <col className="d3-col-rbr" />
@@ -344,7 +345,7 @@ export default function PonudaForm() {
                   <input
                     type="number"
                     max={100}
-                    value={it.qty}
+                    value={it.qty === 0 ? "" : it.qty}
                     onChange={(e) =>
                       updateItem(it.id, { qty: Math.min(100, parseFloat(e.target.value) || 0) })
                     }
@@ -354,7 +355,7 @@ export default function PonudaForm() {
                 <td className="num">
                   <input
                     type="number"
-                    value={it.price}
+                    value={it.price === 0 ? "" : it.price}
                     onChange={(e) => updateItem(it.id, { price: parseFloat(e.target.value) || 0 })}
                     className="field text-right w-full"
                   />
@@ -362,7 +363,7 @@ export default function PonudaForm() {
                 <td className="num">
                   <input
                     type="number"
-                    value={it.discountPct}
+                    value={it.discountPct === 0 ? "" : it.discountPct}
                     onChange={(e) =>
                       updateItem(it.id, { discountPct: parseFloat(e.target.value) || 0 })
                     }
@@ -434,6 +435,7 @@ export default function PonudaForm() {
             </tr>
           </tfoot>
         </table>
+        </div>
 
         {/* Totals */}
         <div className="d3-totals">
@@ -641,11 +643,15 @@ export default function PonudaForm() {
           color: var(--muted);
         }
 
+        .d3-tablewrap {
+          overflow-x: auto;
+          margin-top: 4px;
+        }
         .d3-table {
           width: 100%;
+          min-width: 640px;
           border-collapse: collapse;
           table-layout: fixed;
-          margin-top: 4px;
         }
         .d3-col-rbr {
           width: 30px;
