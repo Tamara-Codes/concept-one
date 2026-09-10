@@ -139,7 +139,7 @@ export default function PonudaForm() {
     });
   }
   function removeItem(id: string) {
-    setItems((prev) => (prev.length > 1 ? prev.filter((it) => it.id !== id) : prev));
+    setItems((prev) => prev.filter((it) => it.id !== id));
   }
   function duplicateItem(id: string) {
     setItems((prev) => {
@@ -435,7 +435,8 @@ export default function PonudaForm() {
                       title="Dodaj nadoplatu"
                     >
                       <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
-                        <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                        <path d="M8 4v6" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+                        <circle cx="8" cy="12.5" r="1" fill="currentColor" />
                       </svg>
                     </button>
                   )}
@@ -862,9 +863,12 @@ export default function PonudaForm() {
           color: #b3261e;
           background: #fdf3f2;
         }
+        .d3-addsurcharge {
+          color: #b3261e;
+          opacity: 0.85;
+        }
         .d3-addsurcharge:hover {
           opacity: 1;
-          color: #b3261e;
           background: #fdf3f2;
         }
 
