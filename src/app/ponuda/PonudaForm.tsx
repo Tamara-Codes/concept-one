@@ -10,32 +10,22 @@ type Item = {
   qty: number;
   price: number;
   discountPct: number;
-  image: string | null;
   dimensions: string;
   isSurcharge: boolean;
 };
-
-const PRESET_IMAGES = [
-  { key: "none", label: "Bez slike", src: null as string | null },
-  { key: "vrata", label: "Vrata", src: "/images/pages/cat-vrata.jpg" },
-  { key: "alubravarija", label: "Alubravarija", src: "/images/pages/cat-alubravarija.jpg" },
-  { key: "podovi", label: "Podovi", src: "/images/pages/cat-podovi.jpg" },
-  { key: "pu-paneli", label: "PU paneli", src: "/images/pages/cat-pu-paneli.jpg" },
-];
 
 const eur = new Intl.NumberFormat("hr-HR", { style: "currency", currency: "EUR" });
 function money(n: number) {
   return eur.format(Number.isFinite(n) ? n : 0);
 }
 
-function newItem(image: string | null = null): Item {
+function newItem(): Item {
   return {
     id: crypto.randomUUID(),
     desc: "",
     qty: 1,
     price: 0,
     discountPct: 0,
-    image,
     dimensions: "",
     isSurcharge: false,
   };
@@ -48,7 +38,6 @@ function newSurchargeItem(): Item {
     qty: 1,
     price: 0,
     discountPct: 0,
-    image: null,
     dimensions: "",
     isSurcharge: true,
   };
@@ -113,7 +102,7 @@ export default function PonudaForm() {
   );
   const [coEmail, setCoEmail] = useState(site.contacts[0].email);
 
-  const [items, setItems] = useState<Item[]>([newItem("/images/pages/cat-vrata.jpg")]);
+  const [items, setItems] = useState<Item[]>([newItem()]);
   const [discountPct, setDiscountPct] = useState(0);
   const [showDiscount, setShowDiscount] = useState(false);
   const [vatRate, setVatRate] = useState(25);
@@ -285,7 +274,6 @@ export default function PonudaForm() {
         <table className="d3-table">
           <colgroup>
             <col className="d3-col-rbr" />
-            <col className="d3-col-img" />
             <col />
             <col className="d3-col-dim" />
             <col className="d3-col-num" />
@@ -297,7 +285,6 @@ export default function PonudaForm() {
           <thead>
             <tr>
               <th>R.br.</th>
-              <th>Slika</th>
               <th>Opis</th>
               <th>Dimenzije</th>
               <th className="num">Kol.</th>
@@ -311,30 +298,6 @@ export default function PonudaForm() {
             {items.map((it, i) => (
               <tr key={it.id} className={it.isSurcharge ? "d3-row-surcharge" : undefined}>
                 <td className="d3-rbr">{i + 1}</td>
-                <td className="d3-imgcell">
-                  {!it.isSurcharge && (
-                    <>
-                      <div className="d3-photo">
-                        {it.image ? <img src={it.image} alt="" /> : <div className="d3-photo-empty" />}
-                      </div>
-                      <select
-                        className="no-print d3-photo-select"
-                        value={PRESET_IMAGES.find((p) => p.src === it.image)?.key ?? "none"}
-                        onChange={(e) =>
-                          updateItem(it.id, {
-                            image: PRESET_IMAGES.find((p) => p.key === e.target.value)?.src ?? null,
-                          })
-                        }
-                      >
-                        {PRESET_IMAGES.map((p) => (
-                          <option key={p.key} value={p.key}>
-                            {p.label}
-                          </option>
-                        ))}
-                      </select>
-                    </>
-                  )}
-                </td>
                 <td>
                   {it.isSurcharge && <div className="d3-surchargetag">Nadoplata</div>}
                   <textarea
@@ -461,7 +424,7 @@ export default function PonudaForm() {
           </tbody>
           <tfoot className="no-print">
             <tr>
-              <td colSpan={9} className="d3-addrow-cell">
+              <td colSpan={8} className="d3-addrow-cell">
                 <button onClick={addItem} className="d3-addrow" aria-label="Dodaj stavku" title="Dodaj stavku">
                   <svg width="14" height="14" viewBox="0 0 16 16" fill="none">
                     <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
@@ -687,11 +650,8 @@ export default function PonudaForm() {
         .d3-col-rbr {
           width: 30px;
         }
-        .d3-col-img {
-          width: 56px;
-        }
         .d3-col-dim {
-          width: 90px;
+          width: 130px;
         }
         .d3-col-num {
           width: 66px;
@@ -739,35 +699,6 @@ export default function PonudaForm() {
           color: var(--muted);
           font-size: 12px;
           vertical-align: middle !important;
-        }
-        .d3-imgcell {
-          text-align: center;
-        }
-        .d3-photo {
-          width: 56px;
-          height: 42px;
-          overflow: hidden;
-          background: var(--panel);
-          margin: 0 auto 3px;
-        }
-        .d3-photo img {
-          width: 100%;
-          height: 100%;
-          object-fit: cover;
-          display: block;
-        }
-        .d3-photo-empty {
-          width: 100%;
-          height: 100%;
-        }
-        .d3-photo-select {
-          font-size: 8.5px;
-          background: var(--panel);
-          color: var(--muted);
-          border: 1px solid var(--line);
-          border-radius: 3px;
-          padding: 1px 2px;
-          width: 100%;
         }
         .d3-name {
           font-size: 13.5px;
