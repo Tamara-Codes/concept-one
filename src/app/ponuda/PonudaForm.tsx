@@ -420,7 +420,7 @@ export default function PonudaForm() {
                 <td className="no-print d3-actionscell">
                   <button
                     onClick={() => duplicateItem(it.id)}
-                    className="d3-duplicate"
+                    className="d3-iconbtn d3-duplicate"
                     aria-label="Dupliciraj stavku"
                     title="Dupliciraj stavku"
                   >
@@ -435,11 +435,18 @@ export default function PonudaForm() {
                   </button>
                   <button
                     onClick={() => removeItem(it.id)}
-                    className="d3-remove"
+                    className="d3-iconbtn d3-remove"
                     aria-label="Ukloni stavku"
                     title="Ukloni stavku"
                   >
-                    &times;
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                      <path
+                        d="M4 4l8 8M12 4l-8 8"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                      />
+                    </svg>
                   </button>
                 </td>
               </tr>
@@ -672,10 +679,10 @@ export default function PonudaForm() {
           width: 66px;
         }
         .d3-col-total {
-          width: 82px;
+          width: 78px;
         }
         .d3-col-actions {
-          width: 32px;
+          width: 56px;
         }
         .d3-table th {
           background: var(--panel);
@@ -705,7 +712,8 @@ export default function PonudaForm() {
           display: flex;
           align-items: center;
           justify-content: center;
-          gap: 4px;
+          gap: 5px;
+          padding: 4px !important;
           border: none !important;
         }
         .d3-rbr {
@@ -794,26 +802,26 @@ export default function PonudaForm() {
         .d3-total-surcharge {
           color: #b3261e !important;
         }
-        .d3-duplicate {
-          color: var(--muted);
-          opacity: 0.6;
+        .d3-iconbtn {
+          width: 22px;
+          height: 22px;
           display: flex;
-          padding: 2px;
+          align-items: center;
+          justify-content: center;
+          border-radius: 5px;
+          color: var(--muted);
+          opacity: 0.75;
+          transition: background-color 0.15s, color 0.15s, opacity 0.15s;
         }
         .d3-duplicate:hover {
           opacity: 1;
           color: var(--accent);
-        }
-        .d3-remove {
-          color: var(--muted);
-          opacity: 0.6;
-          font-size: 14px;
-          line-height: 1;
-          padding: 2px 4px;
+          background: var(--panel);
         }
         .d3-remove:hover {
           opacity: 1;
-          color: #e08a2c;
+          color: #b3261e;
+          background: #fdf3f2;
         }
 
         .d3-totals {
