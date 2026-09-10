@@ -129,8 +129,14 @@ export default function PonudaForm() {
   function addItem() {
     setItems((prev) => [...prev, newItem()]);
   }
-  function addSurcharge() {
-    setItems((prev) => [...prev, newSurchargeItem()]);
+  function addSurchargeAfter(id: string) {
+    setItems((prev) => {
+      const idx = prev.findIndex((it) => it.id === id);
+      if (idx === -1) return [...prev, newSurchargeItem()];
+      const next = [...prev];
+      next.splice(idx + 1, 0, newSurchargeItem());
+      return next;
+    });
   }
   function removeItem(id: string) {
     setItems((prev) => (prev.length > 1 ? prev.filter((it) => it.id !== id) : prev));
@@ -182,12 +188,6 @@ export default function PonudaForm() {
           &larr; Natrag na stranicu
         </a>
         <div className="flex items-center gap-3">
-          <button
-            onClick={addSurcharge}
-            className="text-sm font-medium px-4 py-2 rounded-md border border-[#b3261e]/30 text-[#b3261e] hover:border-[#b3261e] transition-colors"
-          >
-            + Dodaj nadoplatu
-          </button>
           <button
             onClick={() => window.print()}
             className="text-sm font-semibold px-5 py-2 rounded-md bg-co-charcoal text-white hover:bg-co-accent-dark transition-colors"
@@ -427,6 +427,18 @@ export default function PonudaForm() {
                       />
                     </svg>
                   </button>
+                  {!it.isSurcharge && (
+                    <button
+                      onClick={() => addSurchargeAfter(it.id)}
+                      className="d3-iconbtn d3-addsurcharge"
+                      aria-label="Dodaj nadoplatu"
+                      title="Dodaj nadoplatu"
+                    >
+                      <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                        <path d="M8 3v10M3 8h10" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+                      </svg>
+                    </button>
+                  )}
                   <button
                     onClick={() => removeItem(it.id)}
                     className="d3-iconbtn d3-remove"
@@ -687,7 +699,7 @@ export default function PonudaForm() {
           width: 78px;
         }
         .d3-col-actions {
-          width: 56px;
+          width: 82px;
         }
         .d3-table th {
           background: var(--panel);
@@ -846,6 +858,11 @@ export default function PonudaForm() {
           background: var(--panel);
         }
         .d3-remove:hover {
+          opacity: 1;
+          color: #b3261e;
+          background: #fdf3f2;
+        }
+        .d3-addsurcharge:hover {
           opacity: 1;
           color: #b3261e;
           background: #fdf3f2;
