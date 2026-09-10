@@ -12,7 +12,6 @@ type Item = {
   discountPct: number;
   image: string | null;
   dimensions: string;
-  showDimensions: boolean;
   isSurcharge: boolean;
 };
 
@@ -38,7 +37,6 @@ function newItem(image: string | null = null): Item {
     discountPct: 0,
     image,
     dimensions: "",
-    showDimensions: false,
     isSurcharge: false,
   };
 }
@@ -52,8 +50,51 @@ function newSurchargeItem(): Item {
     discountPct: 0,
     image: null,
     dimensions: "",
-    showDimensions: false,
     isSurcharge: true,
+  };
+}
+
+// Parses a number typed either the US way (1234.56) or the Croatian way
+// (1.234,56 / 245,00), so pasted Excel cells work either way.
+function parseNum(raw: string): number {
+  let s = (raw || "").replace(/[€%\s]/g, "").trim();
+  if (!s) return 0;
+  if (/,\d{1,2}$/.test(s)) {
+    s = s.replace(/\./g, "").replace(",", ".");
+  } else {
+    s = s.replace(/,/g, "");
+  }
+  const n = parseFloat(s);
+  return Number.isFinite(n) ? n : 0;
+}
+
+// Maps one pasted row's tab-separated cells to item fields. Column count
+// tells us whether Excel's r/b and/or Ukupno columns were included.
+function mapPastedRow(cols: string[]): Partial<Item> {
+  if (cols.length <= 1) {
+    return { desc: cols[0] || "", qty: 1, price: 0, discountPct: 0 };
+  }
+  if (cols.length === 2) {
+    return { desc: cols[0], qty: parseNum(cols[1]), price: 0, discountPct: 0 };
+  }
+  if (cols.length === 3) {
+    return { desc: cols[0], qty: parseNum(cols[1]), price: parseNum(cols[2]), discountPct: 0 };
+  }
+  if (cols.length === 4) {
+    return {
+      desc: cols[0],
+      qty: parseNum(cols[1]),
+      price: parseNum(cols[2]),
+      discountPct: parseNum(cols[3]),
+    };
+  }
+  // 5+ columns: assume the leading r/b column (and, past 5, a trailing
+  // Ukupno column) came along for the ride.
+  return {
+    desc: cols[1],
+    qty: parseNum(cols[2]),
+    price: parseNum(cols[3]),
+    discountPct: parseNum(cols[4]),
   };
 }
 
@@ -93,6 +134,35 @@ export default function PonudaForm() {
   }
   function removeItem(id: string) {
     setItems((prev) => (prev.length > 1 ? prev.filter((it) => it.id !== id) : prev));
+  }
+  function duplicateItem(id: string) {
+    setItems((prev) => {
+      const idx = prev.findIndex((it) => it.id === id);
+      if (idx === -1) return prev;
+      const copy = { ...prev[idx], id: crypto.randomUUID() };
+      const next = [...prev];
+      next.splice(idx + 1, 0, copy);
+      return next;
+    });
+  }
+
+  // Lets someone paste a block copied from Excel straight into the Opis
+  // cell: the first row fills the row being pasted into, every extra row
+  // becomes a new stavka inserted right after it.
+  function pasteIntoRow(id: string, isSurcharge: boolean, text: string) {
+    const lines = text.split(/\r\n|\n|\r/).filter((l) => l.trim().length > 0);
+    const rows = lines.map((line) => mapPastedRow(line.split("\t")));
+    setItems((prev) => {
+      const idx = prev.findIndex((it) => it.id === id);
+      if (idx === -1 || rows.length === 0) return prev;
+      const updatedFirst = { ...prev[idx], ...rows[0] };
+      const extra = rows
+        .slice(1)
+        .map((patch) => ({ ...(isSurcharge ? newSurchargeItem() : newItem()), ...patch }));
+      const next = [...prev];
+      next.splice(idx, 1, updatedFirst, ...extra);
+      return next;
+    });
   }
 
   const lineTotals = useMemo(
@@ -218,150 +288,164 @@ export default function PonudaForm() {
         </div>
 
         {/* Items */}
-        <div className="d3-items">
-          {items.map((it, i) => (
-            <div key={it.id} className={it.isSurcharge ? "d3-row d3-row-surcharge" : "d3-row"}>
-              {!it.isSurcharge && (
-                <div className="d3-photo-wrap">
-                  <div className="d3-photo">
-                    {it.image ? (
-                      <img src={it.image} alt="" />
-                    ) : (
-                      <div className="d3-photo-empty" />
-                    )}
-                  </div>
-                  <select
-                    className="no-print d3-photo-select"
-                    value={PRESET_IMAGES.find((p) => p.src === it.image)?.key ?? "none"}
-                    onChange={(e) =>
-                      updateItem(it.id, {
-                        image: PRESET_IMAGES.find((p) => p.key === e.target.value)?.src ?? null,
-                      })
-                    }
-                  >
-                    {PRESET_IMAGES.map((p) => (
-                      <option key={p.key} value={p.key}>
-                        {p.label}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-              )}
-
-              <div className="d3-info">
-                {it.isSurcharge && <div className="d3-surchargetag">Nadoplata</div>}
-                <textarea
-                  ref={(el) => {
-                    if (el) {
-                      el.style.height = "auto";
-                      el.style.height = `${el.scrollHeight}px`;
-                    }
-                  }}
-                  value={it.desc}
-                  onChange={(e) => {
-                    updateItem(it.id, { desc: e.target.value });
-                    e.target.style.height = "auto";
-                    e.target.style.height = `${e.target.scrollHeight}px`;
-                  }}
-                  placeholder={
-                    it.isSurcharge
-                      ? "Opis nadoplate (npr. nestandardna dimenzija)"
-                      : "Opis proizvoda / usluge"
-                  }
-                  rows={it.isSurcharge ? 1 : 3}
-                  className={
-                    it.isSurcharge
-                      ? "field d3-name d3-name-surcharge w-full resize-none block overflow-hidden"
-                      : "field d3-name w-full resize-none block overflow-hidden"
-                  }
-                />
-                <div className="d3-qty">
-                  <div>
-                    <span>Kol.</span>
-                    <input
-                      type="number"
-                      max={100}
-                      value={it.qty}
-                      onChange={(e) =>
-                        updateItem(it.id, {
-                          qty: Math.min(100, parseFloat(e.target.value) || 0),
-                        })
-                      }
-                      className="field text-right"
-                    />
-                  </div>
-                  <div>
-                    <span>Cijena &euro;</span>
-                    <input
-                      type="number"
-                      value={it.price}
-                      onChange={(e) => updateItem(it.id, { price: parseFloat(e.target.value) || 0 })}
-                      className="field text-right"
-                    />
-                  </div>
-                  <div>
-                    <span>Rabat %</span>
-                    <input
-                      type="number"
-                      value={it.discountPct}
-                      onChange={(e) =>
-                        updateItem(it.id, { discountPct: parseFloat(e.target.value) || 0 })
-                      }
-                      className="field text-right"
-                    />
-                  </div>
-                </div>
-                {!it.isSurcharge && (
-                  <div className="d3-optional">
-                    {it.showDimensions ? (
-                      <div className="d3-dimensions">
-                        <span>Dimenzije</span>
-                        <div className="d3-dimensions-row">
-                          <input
-                            autoFocus
-                            value={it.dimensions}
-                            onChange={(e) => updateItem(it.id, { dimensions: e.target.value })}
-                            placeholder="npr. 95 x 210 x 18 cm"
-                            className="field"
-                          />
-                          <button
-                            onClick={() =>
-                              updateItem(it.id, { showDimensions: false, dimensions: "" })
-                            }
-                            className="no-print d3-remove-inline"
-                            aria-label="Ukloni dimenzije"
-                          >
-                            &times;
-                          </button>
-                        </div>
+        <table className="d3-table">
+          <colgroup>
+            <col className="d3-col-rbr" />
+            <col className="d3-col-img" />
+            <col />
+            <col className="d3-col-dim" />
+            <col className="d3-col-num" />
+            <col className="d3-col-num" />
+            <col className="d3-col-num" />
+            <col className="d3-col-total" />
+            <col className="no-print d3-col-actions" />
+          </colgroup>
+          <thead>
+            <tr>
+              <th>R.br.</th>
+              <th>Slika</th>
+              <th>Opis</th>
+              <th>Dimenzije</th>
+              <th className="num">Kol.</th>
+              <th className="num">Cijena &euro;</th>
+              <th className="num">Rabat %</th>
+              <th className="num">Ukupno</th>
+              <th className="no-print" />
+            </tr>
+          </thead>
+          <tbody>
+            {items.map((it, i) => (
+              <tr key={it.id} className={it.isSurcharge ? "d3-row-surcharge" : undefined}>
+                <td className="d3-rbr">{i + 1}</td>
+                <td className="d3-imgcell">
+                  {!it.isSurcharge && (
+                    <>
+                      <div className="d3-photo">
+                        {it.image ? <img src={it.image} alt="" /> : <div className="d3-photo-empty" />}
                       </div>
-                    ) : (
-                      <button
-                        onClick={() => updateItem(it.id, { showDimensions: true })}
-                        className="no-print d3-adddim"
+                      <select
+                        className="no-print d3-photo-select"
+                        value={PRESET_IMAGES.find((p) => p.src === it.image)?.key ?? "none"}
+                        onChange={(e) =>
+                          updateItem(it.id, {
+                            image: PRESET_IMAGES.find((p) => p.key === e.target.value)?.src ?? null,
+                          })
+                        }
                       >
-                        + Dimenzije
-                      </button>
-                    )}
+                        {PRESET_IMAGES.map((p) => (
+                          <option key={p.key} value={p.key}>
+                            {p.label}
+                          </option>
+                        ))}
+                      </select>
+                    </>
+                  )}
+                </td>
+                <td>
+                  {it.isSurcharge && <div className="d3-surchargetag">Nadoplata</div>}
+                  <textarea
+                    ref={(el) => {
+                      if (el) {
+                        el.style.height = "auto";
+                        el.style.height = `${el.scrollHeight}px`;
+                      }
+                    }}
+                    value={it.desc}
+                    onChange={(e) => {
+                      updateItem(it.id, { desc: e.target.value });
+                      e.target.style.height = "auto";
+                      e.target.style.height = `${e.target.scrollHeight}px`;
+                    }}
+                    onPaste={(e) => {
+                      const text = e.clipboardData.getData("text/plain");
+                      if (!text.includes("\t") && !text.includes("\n")) return;
+                      e.preventDefault();
+                      pasteIntoRow(it.id, it.isSurcharge, text);
+                    }}
+                    placeholder={
+                      it.isSurcharge ? "Opis nadoplate" : "Opis proizvoda / usluge — ili zalijepi iz Excela"
+                    }
+                    rows={1}
+                    className={
+                      it.isSurcharge
+                        ? "field d3-name d3-name-surcharge w-full resize-none block overflow-hidden"
+                        : "field d3-name w-full resize-none block overflow-hidden"
+                    }
+                  />
+                </td>
+                <td>
+                  {!it.isSurcharge && (
+                    <input
+                      value={it.dimensions}
+                      onChange={(e) => updateItem(it.id, { dimensions: e.target.value })}
+                      placeholder="95 x 210 x 18 cm"
+                      className="field w-full"
+                    />
+                  )}
+                </td>
+                <td className="num">
+                  <input
+                    type="number"
+                    max={100}
+                    value={it.qty}
+                    onChange={(e) =>
+                      updateItem(it.id, { qty: Math.min(100, parseFloat(e.target.value) || 0) })
+                    }
+                    className="field text-right w-full"
+                  />
+                </td>
+                <td className="num">
+                  <input
+                    type="number"
+                    value={it.price}
+                    onChange={(e) => updateItem(it.id, { price: parseFloat(e.target.value) || 0 })}
+                    className="field text-right w-full"
+                  />
+                </td>
+                <td className="num">
+                  <input
+                    type="number"
+                    value={it.discountPct}
+                    onChange={(e) =>
+                      updateItem(it.id, { discountPct: parseFloat(e.target.value) || 0 })
+                    }
+                    className="field text-right w-full"
+                  />
+                </td>
+                <td className="num">
+                  <div className={it.isSurcharge ? "d3-total d3-total-surcharge" : "d3-total"}>
+                    {money(lineTotals[i])}
                   </div>
-                )}
-              </div>
-
-              <div className="d3-rowend">
-                <div className={it.isSurcharge ? "d3-total d3-total-surcharge" : "d3-total"}>
-                  {money(lineTotals[i])}
-                </div>
-                <button
-                  onClick={() => removeItem(it.id)}
-                  className="no-print d3-remove"
-                  aria-label="Ukloni stavku"
-                >
-                  &times;
-                </button>
-              </div>
-            </div>
-          ))}
-        </div>
+                </td>
+                <td className="no-print d3-actionscell">
+                  <button
+                    onClick={() => duplicateItem(it.id)}
+                    className="d3-duplicate"
+                    aria-label="Dupliciraj stavku"
+                    title="Dupliciraj stavku"
+                  >
+                    <svg width="13" height="13" viewBox="0 0 16 16" fill="none">
+                      <rect x="2" y="2" width="9" height="9" rx="1.5" stroke="currentColor" strokeWidth="1.4" />
+                      <path
+                        d="M5.5 11.5V13a1.5 1.5 0 0 0 1.5 1.5h5.5A1.5 1.5 0 0 0 14 13V7.5A1.5 1.5 0 0 0 12.5 6H11"
+                        stroke="currentColor"
+                        strokeWidth="1.4"
+                      />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => removeItem(it.id)}
+                    className="d3-remove"
+                    aria-label="Ukloni stavku"
+                    title="Ukloni stavku"
+                  >
+                    &times;
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
         {/* Totals */}
         <div className="d3-totals">
@@ -569,31 +653,75 @@ export default function PonudaForm() {
           color: var(--muted);
         }
 
-        .d3-items {
+        .d3-table {
+          width: 100%;
+          border-collapse: collapse;
+          table-layout: fixed;
+          margin-top: 4px;
+        }
+        .d3-col-rbr {
+          width: 34px;
+        }
+        .d3-col-img {
+          width: 72px;
+        }
+        .d3-col-dim {
+          width: 120px;
+        }
+        .d3-col-num {
+          width: 60px;
+        }
+        .d3-col-total {
+          width: 96px;
+        }
+        .d3-col-actions {
+          width: 44px;
+        }
+        .d3-table th {
+          background: var(--panel);
+          color: var(--accent);
+          font-size: 9.5px;
+          text-transform: uppercase;
+          letter-spacing: 0.1em;
+          font-weight: 700;
+          text-align: left;
+          padding: 7px 8px;
+          border: 1px solid var(--line);
+          border-bottom: 2px solid var(--ink);
+        }
+        .d3-table th.num {
+          text-align: right;
+        }
+        .d3-table td {
+          border: 1px solid var(--line);
+          padding: 5px 6px;
+          vertical-align: top;
+        }
+        .d3-table td.num {
+          text-align: right;
+        }
+        .d3-actionscell {
           display: flex;
-          flex-direction: column;
-        }
-        .d3-row {
-          display: grid;
-          grid-template-columns: 96px 1fr 110px;
-          gap: 16px;
-          align-items: start;
-          padding: 14px 0;
-          border-bottom: 1px solid var(--line);
-        }
-        .d3-row-surcharge {
-          grid-template-columns: 1fr 110px;
-        }
-        .d3-photo-wrap {
-          display: flex;
-          flex-direction: column;
+          align-items: center;
+          justify-content: center;
           gap: 4px;
+          border: none !important;
+        }
+        .d3-rbr {
+          text-align: center;
+          color: var(--muted);
+          font-size: 12px;
+          vertical-align: middle !important;
+        }
+        .d3-imgcell {
+          text-align: center;
         }
         .d3-photo {
-          width: 96px;
-          height: 72px;
+          width: 56px;
+          height: 42px;
           overflow: hidden;
           background: var(--panel);
+          margin: 0 auto 3px;
         }
         .d3-photo img {
           width: 100%;
@@ -606,64 +734,22 @@ export default function PonudaForm() {
           height: 100%;
         }
         .d3-photo-select {
-          font-size: 9px;
+          font-size: 8.5px;
           background: var(--panel);
           color: var(--muted);
           border: 1px solid var(--line);
-          border-radius: 4px;
-          padding: 2px 4px;
+          border-radius: 3px;
+          padding: 1px 2px;
+          width: 100%;
         }
         .d3-name {
-          font-family: "Fraunces", Georgia, serif;
-          font-size: 17px;
-          font-weight: 600;
-          font-style: normal;
-          color: var(--name);
+          font-size: 13.5px;
+          font-weight: 500;
+          color: var(--ink);
         }
         .d3-name::placeholder {
           color: var(--muted);
-          font-weight: 500;
-        }
-        .d3-qty {
-          display: grid;
-          grid-template-columns: repeat(3, 72px);
-          gap: 14px;
-          margin-top: 10px;
-        }
-        .d3-qty div {
-          display: flex;
-          flex-direction: column;
-        }
-        .d3-qty span {
-          font-size: 9px;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: var(--muted);
-          margin-bottom: 2px;
-        }
-        .d3-qty .field {
-          font-size: 13px;
-          font-variant-numeric: tabular-nums;
-        }
-        .d3-optional {
-          margin-top: 10px;
-        }
-        .d3-dimensions {
-          display: flex;
-          flex-direction: column;
-          max-width: 260px;
-        }
-        .d3-dimensions span {
-          font-size: 9px;
-          text-transform: uppercase;
-          letter-spacing: 0.1em;
-          color: var(--muted);
-          margin-bottom: 2px;
-        }
-        .d3-dimensions-row {
-          display: flex;
-          align-items: center;
-          gap: 6px;
+          font-weight: 400;
         }
         .d3-remove-inline {
           color: var(--muted);
@@ -674,10 +760,6 @@ export default function PonudaForm() {
         .d3-remove-inline:hover {
           opacity: 1;
           color: #b3261e;
-        }
-        .d3-dimensions .field {
-          font-size: 12px;
-          color: var(--ink);
         }
         .d3-adddim {
           font-size: 10.5px;
@@ -690,33 +772,36 @@ export default function PonudaForm() {
           border-bottom-color: var(--accent);
         }
         .d3-surchargetag {
-          font-size: 9.5px;
+          font-size: 8.5px;
           text-transform: uppercase;
-          letter-spacing: 0.14em;
+          letter-spacing: 0.12em;
           color: #b3261e;
           font-weight: 700;
-          margin-bottom: 4px;
+          margin-bottom: 2px;
         }
         .d3-name-surcharge {
           color: #b3261e !important;
-          font-size: 14px !important;
+        }
+        .d3-row-surcharge td {
+          background: #fdf3f2;
+        }
+        .d3-total {
+          font-weight: 600;
+          color: var(--accent);
+          font-variant-numeric: tabular-nums;
         }
         .d3-total-surcharge {
           color: #b3261e !important;
         }
-        .d3-rowend {
+        .d3-duplicate {
+          color: var(--muted);
+          opacity: 0.6;
           display: flex;
-          align-items: center;
-          gap: 8px;
-          justify-content: flex-end;
+          padding: 2px;
         }
-        .d3-total {
-          text-align: right;
-          font-family: "Fraunces", Georgia, serif;
-          font-size: 18px;
-          font-weight: 600;
+        .d3-duplicate:hover {
+          opacity: 1;
           color: var(--accent);
-          font-variant-numeric: tabular-nums;
         }
         .d3-remove {
           color: var(--muted);
