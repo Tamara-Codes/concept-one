@@ -87,6 +87,26 @@ function mapPastedRow(cols: string[]): Partial<Item> {
   };
 }
 
+function OfferPageFooter() {
+  return (
+    <div className="offer-page-footer">
+      <strong>CONCEPT ONE</strong>
+      <span>www.conceptone.hr</span>
+    </div>
+  );
+}
+
+function OfferPageHeading({ title, subtitle }: { title: string; subtitle: string }) {
+  return (
+    <header className="offer-static-heading">
+      <div className="offer-static-brand">CONCEPT ONE</div>
+      <h2>{title}</h2>
+      <p>{subtitle}</p>
+      <div className="offer-gold-rule" />
+    </header>
+  );
+}
+
 export default function PonudaForm() {
   const [offerNumber, setOfferNumber] = useState("001-2026");
   const [offerDate, setOfferDate] = useState(() => new Date().toLocaleDateString("hr-HR"));
@@ -186,7 +206,85 @@ export default function PonudaForm() {
         </div>
       </div>
 
-      <div className="sheet max-w-[210mm] mx-auto shadow-2xl print:shadow-none">
+      <div className="offer-document max-w-[210mm] mx-auto">
+        <section className="offer-page offer-cover-page">
+          <Image
+            src="/images/offer/cover.png"
+            alt="Concept One naslovnica ponude"
+            fill
+            priority
+            sizes="210mm"
+            className="offer-cover-image"
+          />
+          <div className="offer-cover-copy">
+            <h1>PONUDA</h1>
+            <p className="offer-cover-subtitle">Prilagođeno rješenje za vaš prostor</p>
+            <div className="offer-cover-fields">
+              <label>
+                <span>BROJ PONUDE</span>
+                <input value={offerNumber} onChange={(e) => setOfferNumber(e.target.value)} />
+              </label>
+              <label>
+                <span>KLIJENT</span>
+                <input
+                  value={clientName}
+                  onChange={(e) => setClientName(e.target.value)}
+                  placeholder="ime klijenta"
+                />
+              </label>
+              <label>
+                <span>DATUM PONUDE</span>
+                <input value={offerDate} onChange={(e) => setOfferDate(e.target.value)} />
+              </label>
+              <label>
+                <span>PONUDA VRIJEDI DO</span>
+                <input
+                  value={validUntil}
+                  onChange={(e) => setValidUntil(e.target.value)}
+                  placeholder="dd.mm.gggg."
+                />
+              </label>
+            </div>
+          </div>
+          <div className="offer-cover-footer">
+            <strong>CONCEPT ONE</strong>
+            <span>www.conceptone.hr</span>
+          </div>
+        </section>
+
+        <section className="offer-page offer-about-page">
+          <div className="offer-about-image">
+            <Image
+              src="/images/pages/about.jpg"
+              alt="Savjetovanje o aluminijskom sustavu"
+              fill
+              sizes="44vw"
+              className="object-cover"
+            />
+          </div>
+          <div className="offer-about-copy">
+            <div className="offer-static-brand">CONCEPT ONE</div>
+            <h2>O nama</h2>
+            <h3>Jedan partner za cijeli objekt</h3>
+            <p>
+              Concept One nudi aluminijsku bravariju, vrata, podove i PU panele. Odabiremo
+              rješenja koja odgovaraju vašem projektu i pratimo vas od savjetovanja do ugradnje.
+            </p>
+            <p>
+              Surađujemo s provjerenim proizvođačima i pomažemo pri odabiru materijala, završnih
+              obrada i tehničkih rješenja za stambene i poslovne prostore.
+            </p>
+            <ul>
+              <li>Alubravarija</li>
+              <li>Vrata</li>
+              <li>Podovi</li>
+              <li>PU paneli</li>
+            </ul>
+          </div>
+          <OfferPageFooter />
+        </section>
+
+        <section className="sheet offer-page offer-form-page shadow-2xl print:shadow-none">
         {/* Header */}
         <div className="d3-head">
           <Image
@@ -538,9 +636,348 @@ export default function PonudaForm() {
             IBAN: {site.iban} &bull; {site.bank} &bull; www.conceptone.hr
           </p>
         </div>
+        </section>
+
+        <section className="offer-page offer-terms-page">
+          <OfferPageHeading title="Napomena i jamstvo" subtitle="Uvjeti ponude" />
+          <div className="offer-terms-content">
+            <h3>Napomena</h3>
+            <ul>
+              <li>Montaža nije uključena u cijenu.</li>
+              <li>PDV nije uključen u cijenu.</li>
+              <li>Prijevoz na lokaciju uključen je u cijenu.</li>
+              <li>Dizalice i ostala mehanizacija na gradilištu nisu uključene u cijenu.</li>
+              <li>
+                Svi usmeni dogovori, izmjene ili dopune koje nisu navedene u pisanoj ponudi
+                smatraju se nevažećima i nisu obvezujući za Concept One.
+              </li>
+            </ul>
+
+            <h3>Jamstvo</h3>
+            <p>
+              Prodavatelj daje jamstvo u trajanju od 5 godina na profile i postojanost boje,
+              okove i mehanizme te termoizolacijske staklene jedinice. Također, prodavatelj daje
+              jamstvo u trajanju od 2 godine na dodatnu opremu (rolete, komarnike i slično), osim
+              u slučajevima mehaničkih oštećenja, nepravilne uporabe, neadekvatnog održavanja ili
+              nepridržavanja uputa za uporabu.
+            </p>
+            <p>
+              Jamstvo ne obuhvaća oštećenja nastala tijekom prijevoza, rukovanja na lokaciji ili
+              montaže, kao ni oštećenja koja su posljedica nepravilnog skladištenja, manipulacije
+              ili ugradnje od strane trećih osoba.
+            </p>
+          </div>
+          <OfferPageFooter />
+        </section>
+
+        <section className="offer-page offer-brands-page">
+          <OfferPageHeading
+            title="Brendovi u našoj ponudi"
+            subtitle="Suradnja s provjerenim proizvođačima"
+          />
+          <div className="offer-brand-logos">
+            <Image
+              src="/images/offer/brand-logos.png"
+              alt="Brendovi u ponudi"
+              fill
+              sizes="178mm"
+              className="object-contain"
+            />
+          </div>
+          <div className="offer-project-heading">
+            <h2>Naši projekti</h2>
+            <p>Odabrani projekti iz našeg portfelja</p>
+            <div className="offer-gold-rule" />
+          </div>
+          <div className="offer-project-image">
+            <Image
+              src="/images/offer/projects.png"
+              alt="Odabrani projekti"
+              fill
+              sizes="178mm"
+              className="object-cover"
+            />
+          </div>
+          <OfferPageFooter />
+        </section>
+
+        <section className="offer-page offer-technical-page">
+          <OfferPageHeading title="Tehnička prezentacija" subtitle="Proizvodi uključeni u ponudu" />
+          <div className="offer-technical-copy">
+            <h3>REHAU SYNEGO</h3>
+            <p>
+              Synego je napredni PVC sustav prozora koji objedinjuje visoku energetsku
+              učinkovitost, udobnost i suvremen dizajn. Ugradbena dubina od 80 mm i višekomorna
+              konstrukcija profila osiguravaju izvrsnu toplinsku i zvučnu izolaciju, smanjuju
+              gubitke energije te pridonose ugodnoj unutarnjoj klimi tijekom cijele godine.
+              Kvalitetna PVC struktura i moderni okovi osiguravaju dugotrajan, siguran i pouzdan
+              rad, čak i kod većih prozorskih elemenata.
+            </p>
+            <p>
+              Zahvaljujući uravnoteženom odnosu estetike i performansi, Rehau Synego omogućuje
+              čiste linije, vitke profile i maksimalan dotok prirodne svjetlosti. Sustav nudi
+              široke mogućnosti prilagodbe, od različitih boja i dekora do imitacija drva i
+              vanjskih ALU obloga. Tako se lako uklapa u suvremene stambene i poslovne prostore.
+            </p>
+          </div>
+          <div className="offer-technical-image">
+            <Image
+              src="/images/offer/technical.png"
+              alt="Tehnički prikaz sustava Rehau Synego"
+              fill
+              sizes="178mm"
+              className="object-contain"
+            />
+          </div>
+          <OfferPageFooter />
+        </section>
       </div>
 
-      <style jsx global>{`
+      <style>{`
+        .offer-document {
+          display: flex;
+          flex-direction: column;
+          gap: 28px;
+        }
+        .offer-page {
+          position: relative;
+          width: 210mm;
+          min-height: 297mm;
+          overflow: hidden;
+          background: #ffffff;
+          color: #202225;
+          box-shadow: 0 24px 60px rgba(20, 24, 26, 0.2);
+          print-color-adjust: exact;
+          -webkit-print-color-adjust: exact;
+        }
+        .offer-cover-page {
+          isolation: isolate;
+        }
+        .offer-form-page {
+          overflow: visible;
+        }
+        .offer-cover-image {
+          object-fit: cover;
+          z-index: -1;
+        }
+        .offer-cover-copy {
+          position: absolute;
+          left: 16mm;
+          top: 45mm;
+          width: 78mm;
+        }
+        .offer-cover-copy h1 {
+          margin: 0;
+          font-family: "Manrope", system-ui, sans-serif;
+          font-size: 31pt;
+          line-height: 1;
+          font-weight: 800;
+          letter-spacing: 0.01em;
+          color: #202225;
+        }
+        .offer-cover-subtitle {
+          margin: 8mm 0 17mm;
+          color: #54595d;
+          font-size: 12.5pt;
+        }
+        .offer-cover-fields {
+          display: flex;
+          flex-direction: column;
+          gap: 9mm;
+        }
+        .offer-cover-fields label {
+          display: block;
+        }
+        .offer-cover-fields span {
+          display: block;
+          margin-bottom: 2.5mm;
+          color: #8f7044;
+          font-size: 8.5pt;
+          font-weight: 800;
+          letter-spacing: 0.04em;
+        }
+        .offer-cover-fields input {
+          display: block;
+          width: 100%;
+          border: 0;
+          border-bottom: 1px solid #b5945f;
+          outline: none;
+          background: transparent;
+          padding: 0 0 2.5mm;
+          color: #202225;
+          font: 14pt/1.2 "Manrope", system-ui, sans-serif;
+        }
+        .offer-cover-fields input:focus {
+          border-bottom-color: #202225;
+        }
+        .offer-cover-fields input::placeholder {
+          color: rgba(32, 34, 37, 0.55);
+        }
+        .offer-cover-footer {
+          position: absolute;
+          left: 16mm;
+          bottom: 18mm;
+          display: flex;
+          flex-direction: column;
+          gap: 2mm;
+          font-size: 9pt;
+        }
+        .offer-cover-footer strong {
+          color: #8f7044;
+          letter-spacing: 0.04em;
+        }
+        .offer-cover-footer span {
+          color: #202225;
+        }
+
+        .offer-about-page {
+          display: grid;
+          grid-template-columns: 44% 56%;
+          padding-bottom: 22mm;
+        }
+        .offer-about-image {
+          position: relative;
+          min-height: 275mm;
+        }
+        .offer-about-copy {
+          padding: 28mm 15mm 18mm 17mm;
+        }
+        .offer-static-brand {
+          color: #8f7044;
+          font-size: 9pt;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+        }
+        .offer-about-copy h2,
+        .offer-static-heading h2,
+        .offer-project-heading h2 {
+          margin: 7mm 0 0;
+          color: #202225;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 29pt;
+          line-height: 1.05;
+          font-weight: 700;
+        }
+        .offer-about-copy h3 {
+          margin: 5mm 0 15mm;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 18pt;
+          line-height: 1.2;
+        }
+        .offer-about-copy p {
+          margin: 0 0 8mm;
+          color: #54595d;
+          font-size: 11pt;
+          line-height: 1.55;
+        }
+        .offer-about-copy ul {
+          margin: 12mm 0 0;
+          padding: 0;
+          list-style: none;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 15pt;
+          font-weight: 700;
+          line-height: 1.55;
+        }
+        .offer-page-footer {
+          position: absolute;
+          left: 0;
+          right: 0;
+          bottom: 0;
+          height: 22mm;
+          display: flex;
+          flex-direction: column;
+          justify-content: center;
+          padding: 0 15mm;
+          background: #202225;
+          color: #ffffff;
+          font-size: 8.5pt;
+          line-height: 1.55;
+        }
+        .offer-page-footer strong {
+          color: #b5945f;
+          letter-spacing: 0.07em;
+        }
+
+        .offer-static-heading {
+          padding: 18mm 15mm 0;
+        }
+        .offer-static-heading h2 {
+          margin-top: 7mm;
+        }
+        .offer-static-heading p,
+        .offer-project-heading p {
+          margin: 4mm 0 0;
+          color: #54595d;
+          font-size: 12pt;
+        }
+        .offer-gold-rule {
+          width: 100%;
+          height: 1.2mm;
+          margin-top: 8mm;
+          background: #b5945f;
+        }
+        .offer-terms-content {
+          padding: 11mm 15mm 30mm;
+        }
+        .offer-terms-content h3,
+        .offer-technical-copy h3 {
+          margin: 0 0 5mm;
+          color: #8f7044;
+          font-size: 11pt;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .offer-terms-content h3:nth-of-type(2) {
+          margin-top: 18mm;
+        }
+        .offer-terms-content ul {
+          margin: 0;
+          padding-left: 6mm;
+          color: #54595d;
+          font-size: 12pt;
+          line-height: 1.7;
+        }
+        .offer-terms-content p,
+        .offer-technical-copy p {
+          margin: 0 0 7mm;
+          color: #54595d;
+          font-size: 11pt;
+          line-height: 1.6;
+        }
+        .offer-brand-logos {
+          position: relative;
+          width: calc(100% - 30mm);
+          height: 42mm;
+          margin: 11mm 15mm 0;
+        }
+        .offer-project-heading {
+          padding: 8mm 15mm 0;
+        }
+        .offer-project-heading h2 {
+          margin-top: 0;
+          font-size: 27pt;
+        }
+        .offer-project-heading .offer-gold-rule {
+          margin-top: 6mm;
+        }
+        .offer-project-image {
+          position: relative;
+          width: calc(100% - 30mm);
+          height: 99mm;
+          margin: 8mm 15mm 28mm;
+        }
+        .offer-technical-copy {
+          padding: 10mm 15mm 0;
+        }
+        .offer-technical-image {
+          position: relative;
+          width: calc(100% - 30mm);
+          height: 92mm;
+          margin: 7mm 15mm 28mm;
+        }
+
         .sheet {
           --bg: #ffffff;
           --panel: #f3f4f2;
@@ -924,6 +1361,25 @@ export default function PonudaForm() {
           @page {
             size: A4;
             margin: 0;
+          }
+          .offer-document {
+            display: block;
+            max-width: none !important;
+          }
+          .offer-page {
+            width: 210mm;
+            min-height: 297mm;
+            box-shadow: none !important;
+            break-after: page;
+            page-break-after: always;
+          }
+          .offer-page:last-child {
+            break-after: auto;
+            page-break-after: auto;
+          }
+          .offer-form-page {
+            height: auto;
+            overflow: visible;
           }
           .sheet {
             box-shadow: none !important;
