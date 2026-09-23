@@ -53,21 +53,10 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
                 {category.short}
               </p>
               <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-co-charcoal leading-tight mb-8">
-                Kvaliteta i <span className="italic font-medium">preciznost</span>
+                Kvaliteta i <span className="italic font-medium">dizajn</span>
                 <br />
                 u svakom detalju
               </h2>
-              <div className="space-y-5 font-sans text-base text-co-charcoal/60 leading-relaxed">
-                <p>
-                  Ovdje dolazi opis ponude za kategoriju {category.name.toLowerCase()}.
-                  Tekst je privremeni i služi kao predložak dok se ne pripremi
-                  konačan sadržaj, fotografije i cjenik.
-                </p>
-                <p>
-                  Naš tim stoji vam na raspolaganju za savjetovanje, izmjeru i
-                  izradu ponude prilagođene vašem projektu.
-                </p>
-              </div>
             </div>
 
             <div>

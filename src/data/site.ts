@@ -70,8 +70,8 @@ export const categories: CategoryInfo[] = [
       "Ulazna, sobna i protupožarna vrata koja spajaju sigurnost, izolaciju i moderan dizajn.",
     image: "/images/pages/cat-vrata.jpg",
     features: [
-      "Ulazna aluminijska vrata",
-      "Sobna vrata",
+      "Protuprovalna vrata",
+      "Unutarnja sobna vrata",
       "Protupožarna vrata",
       "Garažna vrata",
     ],
@@ -83,20 +83,21 @@ export const categories: CategoryInfo[] = [
     description:
       "Široka ponuda podnih obloga — laminat, parket, vinil i SPC podovi za svaki prostor i stil.",
     image: "/images/pages/cat-podovi.jpg",
-    features: ["Laminat", "Parket", "Vinilni i SPC podovi", "Podne lajsne"],
+    features: [
+      "Laminat",
+      "Parket",
+      "Vinilni i SPC podovi",
+      "Decking",
+      "Podne lajsne",
+    ],
   },
   {
     slug: "pu-paneli",
-    name: "PU paneli",
-    short: "Poliuretanski sendvič paneli za krov i fasadu",
+    name: "Zidni paneli",
+    short: "Zidni paneli za krov i fasadu",
     description:
-      "Poliuretanski sendvič paneli za krovove i fasade — brza montaža, izvrsna toplinska izolacija i dugotrajnost.",
+      "Zidni paneli za vanjsku i unutarnju upotrebu — brza montaža, izvrsna toplinska izolacija i dugotrajnost.",
     image: "/images/pages/cat-pu-paneli.jpg",
-    features: [
-      "Krovni PU paneli",
-      "Fasadni PU paneli",
-      "Hladnjačarski paneli",
-      "Pripadajući limovi i opšavi",
-    ],
+    features: ["Unutarnji paneli", "Fasadni paneli", "Ventilirane fasade"],
   },
 ];

@@ -10,7 +10,7 @@ const navLinks = [
   { href: "/alubravarija", label: "Alubravarija" },
   { href: "/vrata", label: "Vrata" },
   { href: "/podovi", label: "Podovi" },
-  { href: "/pu-paneli", label: "PU paneli" },
+  { href: "/pu-paneli", label: "Zidni paneli" },
   { href: "/o-nama", label: "O nama" },
 ];
 

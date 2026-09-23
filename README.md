@@ -1,6 +1,6 @@
 # Concept One
 
-Static marketing site for Concept One (alubravarija, vrata, podovi, PU paneli).
+Static marketing site for Concept One (alubravarija, vrata, podovi, zidni paneli).
 Built with Next.js 16 + Tailwind 4, same stack and design as the `kerri` site.
 
 ## Run

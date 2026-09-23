@@ -36,8 +36,9 @@ export default function HomePage() {
             <span className="text-co-accent font-medium italic">One</span>
           </h1>
           <p className="animate-fade-up delay-200 font-sans text-base md:text-lg text-white/70 max-w-xl leading-relaxed mb-10">
-            Aluminijska bravarija, vrata, podovi i PU paneli. Sve za vaš
-            objekt na jednom mjestu — od izmjere do montaže.
+            Aluminijska i PVC bravarija, unutarnja vrata, unutarnji i vanjski
+            podovi, vanjske i unutarnje zidne obloge te ogradni sistemi. Sve za
+            vaš objekt na jednom mjestu — od izmjere do montaže.
           </p>
           <div className="animate-fade-up delay-300 flex flex-wrap gap-4">
             <Link
@@ -93,9 +94,6 @@ export default function HomePage() {
                 <div className="absolute inset-0 bg-co-accent/0 group-hover:bg-co-accent/10 transition-colors duration-500" />
 
                 <div className="absolute bottom-0 left-0 right-0 p-5 sm:p-8 lg:p-10">
-                  <p className="font-sans text-[10px] tracking-[0.3em] uppercase text-white/50 mb-2">
-                    {cat.short}
-                  </p>
                   <h3 className="font-serif text-2xl sm:text-3xl lg:text-4xl font-medium text-white mb-2">
                     {cat.name}
                   </h3>
@@ -127,9 +125,10 @@ export default function HomePage() {
                 <span className="italic font-medium">za cijeli objekt</span>
               </h2>
               <p className="font-sans text-base text-white/50 leading-relaxed mb-8">
-                Concept One objedinjuje aluminijsku bravariju, vrata, podove i
-                PU panele pod jednim krovom. Od izmjere i savjetovanja do
-                isporuke i montaže — jedan tim, jedna odgovornost.
+                Concept One objedinjuje aluminijsku i PVC bravariju, unutarnja
+                vrata, unutarnje i vanjske podove, vanjske i unutarnje zidne
+                obloge te ogradne sisteme pod jednim krovom. Od izmjere i
+                savjetovanja do isporuke i montaže — jedan tim, jedna odgovornost.
               </p>
             </div>
             <div className="relative aspect-[4/3] overflow-hidden">
@@ -143,6 +142,7 @@ export default function HomePage() {
               <div className="absolute inset-0 border border-white/10" />
             </div>
           </div>
+
         </div>
       </section>
 

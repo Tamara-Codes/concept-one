@@ -278,7 +278,7 @@ export default function PonudaForm() {
               <li>Alubravarija</li>
               <li>Vrata</li>
               <li>Podovi</li>
-              <li>PU paneli</li>
+              <li>Zidni paneli</li>
             </ul>
           </div>
           <OfferPageFooter />
