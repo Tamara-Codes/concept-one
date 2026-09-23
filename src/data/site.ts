@@ -50,7 +50,7 @@ export interface CategoryInfo {
 export const categories: CategoryInfo[] = [
   {
     slug: "alubravarija",
-    name: "Alubravarija",
+    name: "Aluminijska i PVC bravarija",
     short: "Aluminijski prozori, stijene i fasadni sustavi",
     description:
       "Aluminijska bravarija po mjeri — prozori, ulazne i klizne stijene, fasadni sustavi i zimski vrtovi vrhunske kvalitete.",

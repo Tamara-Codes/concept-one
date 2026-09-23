@@ -7,7 +7,7 @@ import { site } from "@/data/site";
 
 const navLinks = [
   { href: "/", label: "Naslovna" },
-  { href: "/alubravarija", label: "Alubravarija" },
+  { href: "/alubravarija", label: "Alu i PVC bravarija" },
   { href: "/vrata", label: "Vrata" },
   { href: "/podovi", label: "Podovi" },
   { href: "/pu-paneli", label: "Zidni paneli" },
@@ -32,7 +32,7 @@ export default function Header() {
           <Logo />
 
           {/* Desktop nav */}
-          <nav className="hidden lg:flex items-center gap-8">
+          <nav className="hidden xl:flex items-center gap-8">
             {navLinks.map((link) => (
               <Link
                 key={link.href}
@@ -45,7 +45,7 @@ export default function Header() {
           </nav>
 
           {/* Desktop contacts */}
-          <div className="hidden lg:flex flex-col items-end gap-0.5">
+          <div className="hidden xl:flex flex-col items-end gap-0.5">
             {site.contacts.map((contact) => (
               <a
                 key={contact.phone}
@@ -61,7 +61,7 @@ export default function Header() {
           {/* Mobile hamburger */}
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className="lg:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
+            className="xl:hidden flex flex-col justify-center items-center w-10 h-10 gap-1.5"
             aria-label="Otvori izbornik"
           >
             <span className={`block w-6 h-0.5 bg-co-charcoal transition-all duration-300 ${menuOpen ? "rotate-45 translate-y-2" : ""}`} />
@@ -72,7 +72,7 @@ export default function Header() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`lg:hidden overflow-hidden transition-all duration-300 ${menuOpen ? "max-h-[400px]" : "max-h-0"}`}>
+      <div className={`xl:hidden overflow-hidden transition-all duration-300 ${menuOpen ? "max-h-[400px]" : "max-h-0"}`}>
         <nav className="border-t border-black/5 bg-white px-6 py-4 flex flex-col gap-1">
           {navLinks.map((link) => (
             <Link
