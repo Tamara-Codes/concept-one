@@ -7,6 +7,8 @@ import { site } from "@/data/site";
 type Item = {
   id: string;
   desc: string;
+  imageSrc: string;
+  imageName: string;
   qty: number;
   price: number;
   discountPct: number;
@@ -15,6 +17,11 @@ type Item = {
 };
 
 const eur = new Intl.NumberFormat("hr-HR", { style: "currency", currency: "EUR" });
+const offerSectionVisibility = {
+  projects: false,
+  technicalSheet: false,
+};
+
 function money(n: number) {
   return eur.format(Number.isFinite(n) ? n : 0);
 }
@@ -23,6 +30,8 @@ function newItem(): Item {
   return {
     id: crypto.randomUUID(),
     desc: "",
+    imageSrc: "",
+    imageName: "",
     qty: 0,
     price: 0,
     discountPct: 0,
@@ -35,6 +44,8 @@ function newSurchargeItem(): Item {
   return {
     id: crypto.randomUUID(),
     desc: "",
+    imageSrc: "",
+    imageName: "",
     qty: 0,
     price: 0,
     discountPct: 0,
@@ -126,11 +137,25 @@ export default function PonudaForm() {
   const [discountPct, setDiscountPct] = useState(0);
   const [showDiscount, setShowDiscount] = useState(false);
   const [vatRate, setVatRate] = useState(25);
-
   const [paymentTerms, setPaymentTerms] = useState(
     "40% po potvrdi narudžbe, ostatak po obavijesti o spremnosti robe"
   );
   const [deliveryTerms, setDeliveryTerms] = useState("30–45 radnih dana od potvrde narudžbe");
+  const [termsPageTitle, setTermsPageTitle] = useState("Napomena i jamstvo");
+  const [termsPageSubtitle, setTermsPageSubtitle] = useState("Uvjeti ponude");
+  const [notesHeading, setNotesHeading] = useState("Napomena");
+  const [offerNotes, setOfferNotes] = useState([
+    "Montaža nije uključena u cijenu.",
+    "PDV nije uključen u cijenu.",
+    "Prijevoz na lokaciju uključen je u cijenu.",
+    "Dizalice i ostala mehanizacija na gradilištu nisu uključene u cijenu.",
+    "Svi usmeni dogovori, izmjene ili dopune koje nisu navedene u pisanoj ponudi smatraju se nevažećima i nisu obvezujući za Concept One.",
+  ]);
+  const [warrantyHeading, setWarrantyHeading] = useState("Jamstvo");
+  const [warrantyParagraphs, setWarrantyParagraphs] = useState([
+    "Prodavatelj daje jamstvo u trajanju od 5 godina na profile i postojanost boje, okove i mehanizme te termoizolacijske staklene jedinice. Također, prodavatelj daje jamstvo u trajanju od 2 godine na dodatnu opremu (rolete, komarnike i slično), osim u slučajevima mehaničkih oštećenja, nepravilne uporabe, neadekvatnog održavanja ili nepridržavanja uputa za uporabu.",
+    "Jamstvo ne obuhvaća oštećenja nastala tijekom prijevoza, rukovanja na lokaciji ili montaže, kao ni oštećenja koja su posljedica nepravilnog skladištenja, manipulacije ili ugradnje od strane trećih osoba.",
+  ]);
 
   function updateItem(id: string, patch: Partial<Item>) {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
@@ -178,6 +203,16 @@ export default function PonudaForm() {
       next.splice(idx, 1, updatedFirst, ...extra);
       return next;
     });
+  }
+
+  function pasteImageIntoRow(id: string, file: File) {
+    const reader = new FileReader();
+    reader.onload = () =>
+      updateItem(id, {
+        imageSrc: String(reader.result),
+        imageName: file.name || "Slika proizvoda",
+      });
+    reader.readAsDataURL(file);
   }
 
   const lineTotals = useMemo(
@@ -267,7 +302,7 @@ export default function PonudaForm() {
             <h2>O nama</h2>
             <h3>Jedan partner za cijeli objekt</h3>
             <p>
-              Concept One nudi aluminijsku bravariju, vrata, podove i PU panele. Odabiremo
+              Concept One nudi aluminijsku i PVC bravariju, vrata, podove i PU panele. Odabiremo
               rješenja koja odgovaraju vašem projektu i pratimo vas od savjetovanja do ugradnje.
             </p>
             <p>
@@ -275,7 +310,7 @@ export default function PonudaForm() {
               obrada i tehničkih rješenja za stambene i poslovne prostore.
             </p>
             <ul>
-              <li>Alubravarija</li>
+              <li>Aluminijska i PVC bravarija</li>
               <li>Vrata</li>
               <li>Podovi</li>
               <li>Zidni paneli</li>
@@ -413,13 +448,21 @@ export default function PonudaForm() {
                       e.target.style.height = `${e.target.scrollHeight}px`;
                     }}
                     onPaste={(e) => {
+                      const imageFile = Array.from(e.clipboardData.items)
+                        .find((item) => item.kind === "file" && item.type.startsWith("image/"))
+                        ?.getAsFile();
+                      if (imageFile && !it.isSurcharge) {
+                        e.preventDefault();
+                        pasteImageIntoRow(it.id, imageFile);
+                        return;
+                      }
                       const text = e.clipboardData.getData("text/plain");
                       if (!text.includes("\t") && !text.includes("\n")) return;
                       e.preventDefault();
                       pasteIntoRow(it.id, it.isSurcharge, text);
                     }}
                     placeholder={
-                      it.isSurcharge ? "Opis nadoplate" : "Opis proizvoda / usluge — ili zalijepi iz Excela"
+                      it.isSurcharge ? "Opis nadoplate" : "Opis proizvoda / usluge — zalijepi tekst ili sliku"
                     }
                     rows={1}
                     className={
@@ -428,6 +471,18 @@ export default function PonudaForm() {
                         : "field d3-name w-full resize-none block overflow-hidden"
                     }
                   />
+                  {it.imageSrc && !it.isSurcharge && (
+                    <div className="d3-item-image-wrap">
+                      <img src={it.imageSrc} alt={it.imageName || "Slika proizvoda"} className="d3-item-image" />
+                      <button
+                        type="button"
+                        className="no-print d3-item-image-remove"
+                        onClick={() => updateItem(it.id, { imageSrc: "", imageName: "" })}
+                      >
+                        Ukloni sliku
+                      </button>
+                    </div>
+                  )}
                 </td>
                 <td>
                   {!it.isSurcharge && (
@@ -639,33 +694,83 @@ export default function PonudaForm() {
         </section>
 
         <section className="offer-page offer-terms-page">
-          <OfferPageHeading title="Napomena i jamstvo" subtitle="Uvjeti ponude" />
+          <header className="offer-static-heading offer-editable-static-heading">
+            <div className="offer-static-brand">CONCEPT ONE</div>
+            <input
+              value={termsPageTitle}
+              onChange={(event) => setTermsPageTitle(event.target.value)}
+              aria-label="Naslov stranice napomene i jamstva"
+              className="offer-editable-heading-title"
+            />
+            <input
+              value={termsPageSubtitle}
+              onChange={(event) => setTermsPageSubtitle(event.target.value)}
+              aria-label="Podnaslov stranice napomene i jamstva"
+              className="offer-editable-heading-subtitle"
+            />
+            <div className="offer-gold-rule" />
+          </header>
           <div className="offer-terms-content">
-            <h3>Napomena</h3>
+            <input
+              value={notesHeading}
+              onChange={(event) => setNotesHeading(event.target.value)}
+              aria-label="Naslov napomene"
+              className="offer-terms-heading-input"
+            />
             <ul>
-              <li>Montaža nije uključena u cijenu.</li>
-              <li>PDV nije uključen u cijenu.</li>
-              <li>Prijevoz na lokaciju uključen je u cijenu.</li>
-              <li>Dizalice i ostala mehanizacija na gradilištu nisu uključene u cijenu.</li>
-              <li>
-                Svi usmeni dogovori, izmjene ili dopune koje nisu navedene u pisanoj ponudi
-                smatraju se nevažećima i nisu obvezujući za Concept One.
-              </li>
+              {offerNotes.map((note, index) => (
+                <li key={index}>
+                  <textarea
+                    ref={(element) => {
+                      if (element) {
+                        element.style.height = "auto";
+                        element.style.height = `${element.scrollHeight}px`;
+                      }
+                    }}
+                    value={note}
+                    onChange={(event) => {
+                      setOfferNotes((previous) =>
+                        previous.map((item, itemIndex) => (itemIndex === index ? event.target.value : item))
+                      );
+                      event.target.style.height = "auto";
+                      event.target.style.height = `${event.target.scrollHeight}px`;
+                    }}
+                    aria-label={`Napomena ${index + 1}`}
+                    rows={1}
+                    className="offer-terms-textarea"
+                  />
+                </li>
+              ))}
             </ul>
 
-            <h3>Jamstvo</h3>
-            <p>
-              Prodavatelj daje jamstvo u trajanju od 5 godina na profile i postojanost boje,
-              okove i mehanizme te termoizolacijske staklene jedinice. Također, prodavatelj daje
-              jamstvo u trajanju od 2 godine na dodatnu opremu (rolete, komarnike i slično), osim
-              u slučajevima mehaničkih oštećenja, nepravilne uporabe, neadekvatnog održavanja ili
-              nepridržavanja uputa za uporabu.
-            </p>
-            <p>
-              Jamstvo ne obuhvaća oštećenja nastala tijekom prijevoza, rukovanja na lokaciji ili
-              montaže, kao ni oštećenja koja su posljedica nepravilnog skladištenja, manipulacije
-              ili ugradnje od strane trećih osoba.
-            </p>
+            <input
+              value={warrantyHeading}
+              onChange={(event) => setWarrantyHeading(event.target.value)}
+              aria-label="Naslov jamstva"
+              className="offer-terms-heading-input offer-terms-heading-warranty"
+            />
+            {warrantyParagraphs.map((paragraph, index) => (
+              <textarea
+                key={index}
+                ref={(element) => {
+                  if (element) {
+                    element.style.height = "auto";
+                    element.style.height = `${element.scrollHeight}px`;
+                  }
+                }}
+                value={paragraph}
+                onChange={(event) => {
+                  setWarrantyParagraphs((previous) =>
+                    previous.map((item, itemIndex) => (itemIndex === index ? event.target.value : item))
+                  );
+                  event.target.style.height = "auto";
+                  event.target.style.height = `${event.target.scrollHeight}px`;
+                }}
+                aria-label={`Jamstvo ${index + 1}`}
+                rows={1}
+                className="offer-terms-textarea offer-terms-paragraph"
+              />
+            ))}
           </div>
           <OfferPageFooter />
         </section>
@@ -676,61 +781,86 @@ export default function PonudaForm() {
             subtitle="Suradnja s provjerenim proizvođačima"
           />
           <div className="offer-brand-logos">
-            <Image
-              src="/images/offer/brand-logos.png"
-              alt="Brendovi u ponudi"
-              fill
-              sizes="178mm"
-              className="object-contain"
-            />
+            <div className="offer-brand-grid" aria-label="Brendovi u ponudi">
+              <div className="offer-brand-logo offer-brand-sprite offer-brand-schueco" role="img" aria-label="Schüco" />
+              <div className="offer-brand-logo offer-brand-sprite offer-brand-alumil" role="img" aria-label="Alumil" />
+              <div className="offer-brand-logo offer-brand-sprite offer-brand-feal" role="img" aria-label="FEAL" />
+              <div className="offer-brand-logo offer-brand-sprite offer-brand-rehau" role="img" aria-label="Rehau" />
+              <div className="offer-brand-logo">
+                <Image
+                  src="/images/offer/brand-koemmerling.png"
+                  alt="Kömmerling"
+                  fill
+                  sizes="40mm"
+                  className="object-contain"
+                />
+              </div>
+              <div className="offer-brand-logo offer-brand-sprite offer-brand-medle" role="img" aria-label="Medle" />
+              <div className="offer-brand-logo offer-brand-sprite offer-brand-hormann" role="img" aria-label="Hörmann" />
+              <div className="offer-brand-logo">
+                <Image
+                  src="/images/offer/brand-deco.png"
+                  alt="Déco"
+                  fill
+                  sizes="40mm"
+                  className="object-contain"
+                />
+              </div>
+            </div>
           </div>
-          <div className="offer-project-heading">
-            <h2>Naši projekti</h2>
-            <p>Odabrani projekti iz našeg portfelja</p>
-            <div className="offer-gold-rule" />
-          </div>
-          <div className="offer-project-image">
-            <Image
-              src="/images/offer/projects.png"
-              alt="Odabrani projekti"
-              fill
-              sizes="178mm"
-              className="object-cover"
-            />
-          </div>
+          {offerSectionVisibility.projects && (
+            <>
+              <div className="offer-project-heading">
+                <h2>Naši projekti</h2>
+                <p>Odabrani projekti iz našeg portfelja</p>
+                <div className="offer-gold-rule" />
+              </div>
+              <div className="offer-project-image">
+                <Image
+                  src="/images/offer/projects.png"
+                  alt="Odabrani projekti"
+                  fill
+                  sizes="178mm"
+                  className="object-cover"
+                />
+              </div>
+            </>
+          )}
           <OfferPageFooter />
         </section>
 
-        <section className="offer-page offer-technical-page">
-          <OfferPageHeading title="Tehnička prezentacija" subtitle="Proizvodi uključeni u ponudu" />
-          <div className="offer-technical-copy">
-            <h3>REHAU SYNEGO</h3>
-            <p>
-              Synego je napredni PVC sustav prozora koji objedinjuje visoku energetsku
-              učinkovitost, udobnost i suvremen dizajn. Ugradbena dubina od 80 mm i višekomorna
-              konstrukcija profila osiguravaju izvrsnu toplinsku i zvučnu izolaciju, smanjuju
-              gubitke energije te pridonose ugodnoj unutarnjoj klimi tijekom cijele godine.
-              Kvalitetna PVC struktura i moderni okovi osiguravaju dugotrajan, siguran i pouzdan
-              rad, čak i kod većih prozorskih elemenata.
-            </p>
-            <p>
-              Zahvaljujući uravnoteženom odnosu estetike i performansi, Rehau Synego omogućuje
-              čiste linije, vitke profile i maksimalan dotok prirodne svjetlosti. Sustav nudi
-              široke mogućnosti prilagodbe, od različitih boja i dekora do imitacija drva i
-              vanjskih ALU obloga. Tako se lako uklapa u suvremene stambene i poslovne prostore.
-            </p>
-          </div>
-          <div className="offer-technical-image">
-            <Image
-              src="/images/offer/technical.png"
-              alt="Tehnički prikaz sustava Rehau Synego"
-              fill
-              sizes="178mm"
-              className="object-contain"
-            />
-          </div>
-          <OfferPageFooter />
-        </section>
+        {offerSectionVisibility.technicalSheet && (
+          <section className="offer-page offer-technical-page">
+            <OfferPageHeading title="Tehnička prezentacija" subtitle="Proizvodi uključeni u ponudu" />
+            <div className="offer-technical-copy">
+              <h3>REHAU SYNEGO</h3>
+              <p>
+                Synego je napredni PVC sustav prozora koji objedinjuje visoku energetsku
+                učinkovitost, udobnost i suvremen dizajn. Ugradbena dubina od 80 mm i višekomorna
+                konstrukcija profila osiguravaju izvrsnu toplinsku i zvučnu izolaciju, smanjuju
+                gubitke energije te pridonose ugodnoj unutarnjoj klimi tijekom cijele godine.
+                Kvalitetna PVC struktura i moderni okovi osiguravaju dugotrajan, siguran i pouzdan
+                rad, čak i kod većih prozorskih elemenata.
+              </p>
+              <p>
+                Zahvaljujući uravnoteženom odnosu estetike i performansi, Rehau Synego omogućuje
+                čiste linije, vitke profile i maksimalan dotok prirodne svjetlosti. Sustav nudi
+                široke mogućnosti prilagodbe, od različitih boja i dekora do imitacija drva i
+                vanjskih ALU obloga. Tako se lako uklapa u suvremene stambene i poslovne prostore.
+              </p>
+            </div>
+            <div className="offer-technical-image">
+              <Image
+                src="/images/offer/technical.png"
+                alt="Tehnički prikaz sustava Rehau Synego"
+                fill
+                sizes="178mm"
+                className="object-contain"
+              />
+            </div>
+            <OfferPageFooter />
+          </section>
+        )}
       </div>
 
       <style>{`
@@ -911,6 +1041,35 @@ export default function PonudaForm() {
           color: #54595d;
           font-size: 12pt;
         }
+        .offer-editable-heading-title,
+        .offer-editable-heading-subtitle,
+        .offer-terms-heading-input,
+        .offer-terms-textarea {
+          display: block;
+          width: 100%;
+          border: 0;
+          outline: none;
+          background: transparent;
+        }
+        .offer-editable-heading-title:focus,
+        .offer-editable-heading-subtitle:focus,
+        .offer-terms-heading-input:focus,
+        .offer-terms-textarea:focus {
+          box-shadow: inset 0 -1px 0 #b5945f;
+        }
+        .offer-editable-heading-title {
+          margin-top: 7mm;
+          color: #202225;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 29pt;
+          line-height: 1.05;
+          font-weight: 700;
+        }
+        .offer-editable-heading-subtitle {
+          margin-top: 4mm;
+          color: #54595d;
+          font-size: 12pt;
+        }
         .offer-gold-rule {
           width: 100%;
           height: 1.2mm;
@@ -932,12 +1091,37 @@ export default function PonudaForm() {
         .offer-terms-content h3:nth-of-type(2) {
           margin-top: 18mm;
         }
+        .offer-terms-heading-input {
+          margin: 0 0 5mm;
+          color: #8f7044;
+          font-size: 11pt;
+          font-weight: 800;
+          letter-spacing: 0.08em;
+          text-transform: uppercase;
+        }
+        .offer-terms-heading-warranty {
+          margin-top: 18mm;
+        }
         .offer-terms-content ul {
           margin: 0;
           padding-left: 6mm;
           color: #54595d;
           font-size: 12pt;
           line-height: 1.7;
+        }
+        .offer-terms-textarea {
+          resize: none;
+          overflow: hidden;
+          padding: 0;
+          color: inherit;
+          font: inherit;
+          line-height: inherit;
+        }
+        .offer-terms-paragraph {
+          margin: 0 0 7mm;
+          color: #54595d;
+          font-size: 11pt;
+          line-height: 1.6;
         }
         .offer-terms-content p,
         .offer-technical-copy p {
@@ -949,8 +1133,44 @@ export default function PonudaForm() {
         .offer-brand-logos {
           position: relative;
           width: calc(100% - 30mm);
-          height: 42mm;
+          height: 64mm;
           margin: 11mm 15mm 0;
+        }
+        .offer-brand-grid {
+          display: grid;
+          grid-template-columns: repeat(4, minmax(0, 1fr));
+          grid-template-rows: repeat(2, minmax(0, 1fr));
+          gap: 7mm 5mm;
+          width: 100%;
+          height: 100%;
+        }
+        .offer-brand-logo {
+          position: relative;
+          min-width: 0;
+          min-height: 0;
+        }
+        .offer-brand-sprite {
+          background-image: url("/images/offer/brand-logos.png");
+          background-repeat: no-repeat;
+          background-size: 400% 200%;
+        }
+        .offer-brand-schueco {
+          background-position: 0 0;
+        }
+        .offer-brand-alumil {
+          background-position: 0 100%;
+        }
+        .offer-brand-feal {
+          background-position: 33.333% 0;
+        }
+        .offer-brand-rehau {
+          background-position: 66.667% 0;
+        }
+        .offer-brand-medle {
+          background-position: 33.333% 100%;
+        }
+        .offer-brand-hormann {
+          background-position: 66.667% 100%;
         }
         .offer-project-heading {
           padding: 8mm 15mm 0;
@@ -977,7 +1197,6 @@ export default function PonudaForm() {
           height: 92mm;
           margin: 7mm 15mm 28mm;
         }
-
         .sheet {
           --bg: #ffffff;
           --panel: #f3f4f2;
@@ -1151,6 +1370,25 @@ export default function PonudaForm() {
         .d3-name::placeholder {
           color: var(--muted);
           font-weight: 400;
+        }
+        .d3-item-image-wrap {
+          margin-top: 6px;
+        }
+        .d3-item-image {
+          display: block;
+          max-width: 100%;
+          max-height: 34mm;
+          object-fit: contain;
+          object-position: left top;
+        }
+        .d3-item-image-remove {
+          margin-top: 4px;
+          color: #b3261e;
+          font-size: 9px;
+          font-weight: 700;
+        }
+        .d3-item-image-remove:hover {
+          text-decoration: underline;
         }
         .d3-remove-inline {
           color: var(--muted);
