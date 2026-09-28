@@ -19,7 +19,46 @@ type Item = {
 const eur = new Intl.NumberFormat("hr-HR", { style: "currency", currency: "EUR" });
 const offerSectionVisibility = {
   projects: false,
-  technicalSheet: false,
+};
+
+type TechnicalSheet = {
+  id: string;
+  name: string;
+  description: string;
+  storageKey: string;
+};
+
+type InitialOffer = {
+  id: string;
+  offerNumber: string;
+  offerDate: string;
+  validUntil: string | null;
+  clientName: string;
+  clientAddress: string;
+  clientPhone: string;
+  clientEmail: string;
+  coContact: string;
+  coEmail: string;
+  discountPct: string | number;
+  showDiscount: boolean;
+  vatRate: string | number;
+  paymentTerms: string;
+  deliveryTerms: string;
+  termsPageTitle: string;
+  termsPageSubtitle: string;
+  notesHeading: string;
+  offerNotes: string[];
+  warrantyHeading: string;
+  warrantyParagraphs: string[];
+  items: Array<{
+    description: string;
+    imageName: string | null;
+    quantity: string | number;
+    unitPrice: string | number;
+    discountPct: string | number;
+    dimensions: string;
+    isSurcharge: boolean;
+  }>;
 };
 
 function money(n: number) {
@@ -118,41 +157,38 @@ function OfferPageHeading({ title, subtitle }: { title: string; subtitle: string
   );
 }
 
-export default function PonudaForm() {
-  const [offerNumber, setOfferNumber] = useState("001-2026");
-  const [offerDate, setOfferDate] = useState(() => new Date().toLocaleDateString("hr-HR"));
-  const [validUntil, setValidUntil] = useState("");
+export default function PonudaForm({ technicalSheets = [], initialOffer }: { technicalSheets?: TechnicalSheet[]; initialOffer?: InitialOffer }) {
+  const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "exists" | "error">("idle");
+  const [offerNumber, setOfferNumber] = useState(initialOffer?.offerNumber ?? "001-2026");
+  const [offerDate, setOfferDate] = useState(initialOffer?.offerDate ?? new Date().toLocaleDateString("hr-HR"));
+  const [validUntil, setValidUntil] = useState(initialOffer?.validUntil ?? "");
 
-  const [clientName, setClientName] = useState("");
-  const [clientAddress, setClientAddress] = useState("");
-  const [clientPhone, setClientPhone] = useState("");
-  const [clientEmail, setClientEmail] = useState("");
+  const [clientName, setClientName] = useState(initialOffer?.clientName ?? "");
+  const [clientAddress, setClientAddress] = useState(initialOffer?.clientAddress ?? "");
+  const [clientPhone, setClientPhone] = useState(initialOffer?.clientPhone ?? "");
+  const [clientEmail, setClientEmail] = useState(initialOffer?.clientEmail ?? "");
 
-  const [coContact, setCoContact] = useState(
-    `${site.contacts[0].name} · ${site.contacts[0].phoneDisplay}`
-  );
-  const [coEmail, setCoEmail] = useState(site.contacts[0].email);
+  const [coContact, setCoContact] = useState(initialOffer?.coContact ?? `${site.contacts[0].name} · ${site.contacts[0].phoneDisplay}`);
+  const [coEmail, setCoEmail] = useState(initialOffer?.coEmail ?? site.contacts[0].email);
 
-  const [items, setItems] = useState<Item[]>([newItem()]);
-  const [discountPct, setDiscountPct] = useState(0);
-  const [showDiscount, setShowDiscount] = useState(false);
-  const [vatRate, setVatRate] = useState(25);
-  const [paymentTerms, setPaymentTerms] = useState(
-    "40% po potvrdi narudžbe, ostatak po obavijesti o spremnosti robe"
-  );
-  const [deliveryTerms, setDeliveryTerms] = useState("30–45 radnih dana od potvrde narudžbe");
-  const [termsPageTitle, setTermsPageTitle] = useState("Napomena i jamstvo");
-  const [termsPageSubtitle, setTermsPageSubtitle] = useState("Uvjeti ponude");
-  const [notesHeading, setNotesHeading] = useState("Napomena");
-  const [offerNotes, setOfferNotes] = useState([
+  const [items, setItems] = useState<Item[]>(initialOffer?.items?.length ? initialOffer.items.map((item) => ({ ...newItem(), id: crypto.randomUUID(), desc: item.description, imageName: item.imageName ?? "", qty: Number(item.quantity), price: Number(item.unitPrice), discountPct: Number(item.discountPct), dimensions: item.dimensions, isSurcharge: item.isSurcharge })) : [newItem()]);
+  const [discountPct, setDiscountPct] = useState(Number(initialOffer?.discountPct ?? 0));
+  const [showDiscount, setShowDiscount] = useState(initialOffer?.showDiscount ?? false);
+  const [vatRate, setVatRate] = useState(Number(initialOffer?.vatRate ?? 25));
+  const [paymentTerms, setPaymentTerms] = useState(initialOffer?.paymentTerms ?? "40% po potvrdi narudžbe, ostatak po obavijesti o spremnosti robe");
+  const [deliveryTerms, setDeliveryTerms] = useState(initialOffer?.deliveryTerms ?? "30–45 radnih dana od potvrde narudžbe");
+  const [termsPageTitle, setTermsPageTitle] = useState(initialOffer?.termsPageTitle ?? "Napomena i jamstvo");
+  const [termsPageSubtitle, setTermsPageSubtitle] = useState(initialOffer?.termsPageSubtitle ?? "Uvjeti ponude");
+  const [notesHeading, setNotesHeading] = useState(initialOffer?.notesHeading ?? "Napomena");
+  const [offerNotes, setOfferNotes] = useState(initialOffer?.offerNotes ?? [
     "Montaža nije uključena u cijenu.",
     "PDV nije uključen u cijenu.",
     "Prijevoz na lokaciju uključen je u cijenu.",
     "Dizalice i ostala mehanizacija na gradilištu nisu uključene u cijenu.",
     "Svi usmeni dogovori, izmjene ili dopune koje nisu navedene u pisanoj ponudi smatraju se nevažećima i nisu obvezujući za Concept One.",
   ]);
-  const [warrantyHeading, setWarrantyHeading] = useState("Jamstvo");
-  const [warrantyParagraphs, setWarrantyParagraphs] = useState([
+  const [warrantyHeading, setWarrantyHeading] = useState(initialOffer?.warrantyHeading ?? "Jamstvo");
+  const [warrantyParagraphs, setWarrantyParagraphs] = useState(initialOffer?.warrantyParagraphs ?? [
     "Prodavatelj daje jamstvo u trajanju od 5 godina na profile i postojanost boje, okove i mehanizme te termoizolacijske staklene jedinice. Također, prodavatelj daje jamstvo u trajanju od 2 godine na dodatnu opremu (rolete, komarnike i slično), osim u slučajevima mehaničkih oštećenja, nepravilne uporabe, neadekvatnog održavanja ili nepridržavanja uputa za uporabu.",
     "Jamstvo ne obuhvaća oštećenja nastala tijekom prijevoza, rukovanja na lokaciji ili montaže, kao ni oštećenja koja su posljedica nepravilnog skladištenja, manipulacije ili ugradnje od strane trećih osoba.",
   ]);
@@ -225,19 +261,82 @@ export default function PonudaForm() {
   const vatAmount = vatBase * (vatRate / 100);
   const grandTotal = vatBase + vatAmount;
 
+  async function saveOffer() {
+    setSaveState("saving");
+    try {
+      const response = await fetch("/api/offers", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          offerId: initialOffer?.id,
+          offerNumber,
+          offerDate,
+          validUntil,
+          clientName,
+          clientAddress,
+          clientPhone,
+          clientEmail,
+          coContact,
+          coEmail,
+          discountPct,
+          showDiscount,
+          vatRate,
+          paymentTerms,
+          deliveryTerms,
+          termsPageTitle,
+          termsPageSubtitle,
+          notesHeading,
+          offerNotes,
+          warrantyHeading,
+          warrantyParagraphs,
+          technicalSheetIds: technicalSheets.map((sheet) => sheet.id),
+          items: items.map((item, index) => ({
+            position: index,
+            description: item.desc,
+            imageKey: null,
+            imageName: item.imageName || null,
+            imageContentType: null,
+            quantity: item.qty,
+            unitPrice: item.price,
+            discountPct: item.discountPct,
+            dimensions: item.dimensions,
+            isSurcharge: item.isSurcharge,
+          })),
+        }),
+      });
+      if (response.status === 409) {
+        setSaveState("exists");
+        return;
+      }
+      if (!response.ok) throw new Error("Spremanje nije uspjelo");
+      setSaveState("saved");
+    } catch {
+      setSaveState("error");
+    }
+  }
+
   return (
     <div className="min-h-screen bg-co-warm-dark py-10 print:bg-white print:py-0">
       <div className="no-print max-w-[210mm] mx-auto px-4 mb-4 flex items-center justify-between">
-        <a href="/" className="text-sm text-co-charcoal/50 hover:text-co-accent-dark transition-colors">
-          &larr; Natrag na stranicu
+        <a href={initialOffer ? "/ponuda/saved" : "/ponuda"} className="text-sm text-co-charcoal/50 hover:text-co-accent-dark transition-colors">
+          &larr; Natrag na ponude
         </a>
         <div className="flex items-center gap-3">
+          <button
+            onClick={saveOffer}
+            disabled={saveState === "saving" || saveState === "saved" || saveState === "exists"}
+            className="text-sm font-semibold px-5 py-2 rounded-md border border-co-charcoal/20 bg-white text-co-charcoal hover:bg-co-warm transition-colors disabled:cursor-default disabled:opacity-60"
+          >
+            {saveState === "saving" ? "Spremam…" : saveState === "saved" ? "Spremljeno" : saveState === "exists" ? "Već spremljeno" : "Spremi ponudu"}
+          </button>
           <button
             onClick={() => window.print()}
             className="text-sm font-semibold px-5 py-2 rounded-md bg-co-charcoal text-white hover:bg-co-accent-dark transition-colors"
           >
             Ispi&scaron;i / Spremi kao PDF
           </button>
+          {saveState === "exists" && <span className="text-sm text-slate-600">Broj ponude već postoji u arhivi.</span>}
+          {saveState === "error" && <span className="text-sm text-red-700">Spremanje nije uspjelo.</span>}
         </div>
       </div>
 
@@ -829,30 +928,18 @@ export default function PonudaForm() {
           <OfferPageFooter />
         </section>
 
-        {offerSectionVisibility.technicalSheet && (
-          <section className="offer-page offer-technical-page">
-            <OfferPageHeading title="Tehnička prezentacija" subtitle="Proizvodi uključeni u ponudu" />
+        {technicalSheets.map((sheet) => (
+          <section className="offer-page offer-technical-page" key={sheet.name}>
+            <OfferPageHeading title={`Tehnička prezentacija: ${sheet.name}`} subtitle="Proizvod uključen u ponudu" />
             <div className="offer-technical-copy">
-              <h3>REHAU SYNEGO</h3>
-              <p>
-                Synego je napredni PVC sustav prozora koji objedinjuje visoku energetsku
-                učinkovitost, udobnost i suvremen dizajn. Ugradbena dubina od 80 mm i višekomorna
-                konstrukcija profila osiguravaju izvrsnu toplinsku i zvučnu izolaciju, smanjuju
-                gubitke energije te pridonose ugodnoj unutarnjoj klimi tijekom cijele godine.
-                Kvalitetna PVC struktura i moderni okovi osiguravaju dugotrajan, siguran i pouzdan
-                rad, čak i kod većih prozorskih elemenata.
-              </p>
-              <p>
-                Zahvaljujući uravnoteženom odnosu estetike i performansi, Rehau Synego omogućuje
-                čiste linije, vitke profile i maksimalan dotok prirodne svjetlosti. Sustav nudi
-                široke mogućnosti prilagodbe, od različitih boja i dekora do imitacija drva i
-                vanjskih ALU obloga. Tako se lako uklapa u suvremene stambene i poslovne prostore.
-              </p>
+              <h3>{sheet.name}</h3>
+              <p>{sheet.description}</p>
+              <p>Ovo je testni tehnički list. PDF i slika proizvoda mogu se dodati u R2 spremnik prije produkcije.</p>
             </div>
             <div className="offer-technical-image">
               <Image
                 src="/images/offer/technical.png"
-                alt="Tehnički prikaz sustava Rehau Synego"
+                alt={`Testni prikaz za ${sheet.name}`}
                 fill
                 sizes="178mm"
                 className="object-contain"
@@ -860,7 +947,7 @@ export default function PonudaForm() {
             </div>
             <OfferPageFooter />
           </section>
-        )}
+        ))}
       </div>
 
       <style>{`

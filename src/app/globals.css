@@ -78,6 +78,34 @@ body {
   margin-top: 1rem;
 }
 
+@layer components {
+/* Offer dashboard layout: kept as explicit CSS so the authenticated and public preview routes render identically. */
+.offer-dashboard-root {
+  min-height: 100vh;
+  padding: 2rem clamp(1.25rem, 4vw, 3rem);
+  background: var(--color-co-warm);
+}
+.offer-dashboard-root > div { max-width: 72rem; margin: 0 auto; }
+.offer-dashboard-root header { display: flex; align-items: flex-end; justify-content: space-between; gap: 1.5rem; padding-bottom: 1.75rem; border-bottom: 1px solid rgba(30,35,38,.12); }
+.offer-dashboard-root header h1 { margin: .75rem 0 0; font-size: clamp(2rem, 4vw, 2.5rem); line-height: 1.05; }
+.offer-dashboard-root header p { margin: .5rem 0 0; }
+.offer-dashboard-root > div > section:first-of-type { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(280px, .75fr); gap: 1.25rem; margin-top: 2rem; }
+.offer-dashboard-root > div > section:first-of-type > a,
+.offer-dashboard-root > div > section:first-of-type > div { border-radius: 1.5rem; }
+.offer-dashboard-root > div > section:first-of-type > a { min-height: 20rem; padding: 2.25rem; display: flex; }
+.offer-dashboard-root > div > section:first-of-type > a > div { display: flex; flex: 1; flex-direction: column; justify-content: space-between; gap: 2rem; }
+.offer-dashboard-root > div > section:first-of-type > div { padding: 2rem; }
+.offer-dashboard-root > div > section:nth-of-type(2) { margin-top: 2.5rem; }
+.offer-dashboard-root > div > section:nth-of-type(2) > div:last-child { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 1rem; margin-top: 1.25rem; }
+.offer-dashboard-root > div > section:nth-of-type(2) > div:last-child a { min-height: 9rem; padding: 1.25rem; border-radius: 1rem; }
+.offer-dashboard-root > div > section:last-of-type { margin-top: 2.5rem; padding: 2rem; border-radius: 1.5rem; }
+@media (max-width: 760px) {
+  .offer-dashboard-root header { align-items: flex-start; flex-direction: column; }
+  .offer-dashboard-root > div > section:first-of-type { grid-template-columns: 1fr; }
+  .offer-dashboard-root > div > section:nth-of-type(2) > div:last-child { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+}
+
 .line-accent-center::after {
   content: '';
   display: block;
