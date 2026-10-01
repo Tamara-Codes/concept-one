@@ -2,6 +2,7 @@
 // Legal data from public registers (Fina info.BIZ / fininfo.hr), checked 2026-09-02.
 export const site = {
   name: "Concept One",
+  url: "https://www.conceptone.hr",
   company: "INNOVA PROJEKT d.o.o.",
   legalName:
     "INNOVA PROJEKT društvo s ograničenom odgovornošću za građevinarstvo i usluge",

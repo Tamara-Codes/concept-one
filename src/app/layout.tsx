@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 
 export const metadata: Metadata = {
+  metadataBase: new URL("https://www.conceptone.hr"),
   title:
     "Concept One | Bravarija, vrata, podovi, zidne obloge i ograde",
   description:

@@ -4,6 +4,7 @@ import CategoryPage from "@/components/CategoryPage";
 export const metadata: Metadata = {
   title: "Vrata | Concept One",
   description: "Ulazna, sobna, protupozarna i garazna vrata.",
+  alternates: { canonical: "/vrata" },
 };
 
 export default function Page() {

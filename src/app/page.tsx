@@ -1,8 +1,47 @@
 import Image from "next/image";
 import Link from "next/link";
+import type { Metadata } from "next";
 import { categories, site } from "@/data/site";
 import Header from "@/components/Header";
 import Footer from "@/components/Footer";
+
+export const metadata: Metadata = {
+  alternates: { canonical: "/" },
+};
+
+const businessJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "LocalBusiness",
+  "@id": `${site.url}/#business`,
+  name: site.name,
+  legalName: site.legalName,
+  url: site.url,
+  image: `${site.url}/images/pages/hero.jpg`,
+  description:
+    "Aluminijska i PVC bravarija, unutarnja vrata, unutarnji i vanjski podovi, zidne obloge i ogradni sistemi.",
+  address: {
+    "@type": "PostalAddress",
+    streetAddress: site.street,
+    postalCode: "51215",
+    addressLocality: "Kastav",
+    addressCountry: "HR",
+  },
+  contactPoint: site.contacts.map((contact) => ({
+    "@type": "ContactPoint",
+    name: contact.name,
+    telephone: contact.phone,
+    email: contact.email,
+    contactType: "sales",
+    availableLanguage: "Croatian",
+  })),
+  knowsAbout: [
+    "Aluminijska i PVC bravarija",
+    "Unutarnja vrata",
+    "Podovi",
+    "Zidne obloge",
+    "Ogradni sistemi",
+  ],
+};
 
 const ArrowIcon = () => (
   <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -13,6 +52,12 @@ const ArrowIcon = () => (
 export default function HomePage() {
   return (
     <main className="min-h-screen">
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(businessJsonLd).replace(/</g, "\\u003c"),
+        }}
+      />
       <Header />
 
       {/* ═══════════════ HERO ═══════════════ */}

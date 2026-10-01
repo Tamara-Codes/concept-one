@@ -8,6 +8,7 @@ export const metadata: Metadata = {
   title: "O nama | Concept One",
   description:
     "Concept One - Vaš partner za aluminijsku i PVC bravariju, unutarnja vrata, unutarnje i vanjske podove, zidne obloge i ogradne sisteme.",
+  alternates: { canonical: "/o-nama" },
 };
 
 const googleMapsUrl =
