@@ -8,10 +8,10 @@ import {
   NeonAuthUIProvider,
 } from "@neondatabase/auth-ui";
 
-// Browser auth goes through our local proxy so the verifier/session cookies
-// stay on the app's origin and can be finalized by Neon Auth middleware.
+// Browser auth goes through our local API so Neon session cookies stay on the
+// application's origin.
 const authClient = createAuthClient(
-  `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3101"}/api/auth`,
+  `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3100"}/api/auth`,
 );
 
 export default function SignInPage() {
@@ -57,22 +57,23 @@ export default function SignInPage() {
             redirectTo={redirectTarget}
             credentials={false}
             signUp={false}
-            social={{ providers: ["google"] }}
+            emailOTP
+            localizeErrors={false}
             localization={{
               ...authLocalization,
               SIGN_IN: "Prijava",
               SIGN_IN_ACTION: "Prijavi se",
-              SIGN_IN_DESCRIPTION: "Unesite poslovnu adresu za nastavak.",
-              DISABLED_CREDENTIALS_DESCRIPTION:
-                "Nastavite sigurnom prijavom putem Google računa.",
-              SIGN_IN_WITH: "Nastavi s",
+              SIGN_IN_DESCRIPTION:
+                "Unesite odobrenu e-mail adresu. Poslat ćemo vam kod za prijavu.",
               EMAIL: "E-mail",
-              EMAIL_PLACEHOLDER: "vas@email.com",
-              PASSWORD: "Lozinka",
-              PASSWORD_PLACEHOLDER: "Lozinka",
-              FORGOT_PASSWORD_LINK: "Zaboravili ste lozinku?",
-              DONT_HAVE_AN_ACCOUNT: "Nemate račun?",
-              SIGN_UP: "Registracija",
+              EMAIL_PLACEHOLDER: "ime@conceptone.hr",
+              EMAIL_OTP: "Jednokratni kod",
+              EMAIL_OTP_SEND_ACTION: "Pošalji kod",
+              EMAIL_OTP_VERIFY_ACTION: "Potvrdi kod",
+              EMAIL_OTP_DESCRIPTION:
+                "Unesite odobrenu e-mail adresu kako biste primili kod.",
+              EMAIL_OTP_VERIFICATION_SENT:
+                "Kod je poslan na vašu e-mail adresu.",
             }}
             className="w-full"
           >
