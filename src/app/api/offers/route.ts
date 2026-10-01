@@ -48,7 +48,6 @@ export async function POST(request: Request) {
         offerNotes: Array.isArray(body.offerNotes) ? body.offerNotes.map(String) : [],
         warrantyHeading: String(body.warrantyHeading ?? "Jamstvo"),
         warrantyParagraphs: Array.isArray(body.warrantyParagraphs) ? body.warrantyParagraphs.map(String) : [],
-        createdBy: email,
         updatedBy: email,
       };
     let offerId: string;
@@ -59,7 +58,7 @@ export async function POST(request: Request) {
       await db.delete(offerItems).where(eq(offerItems.offerId, offerId));
       await db.delete(offerTechnicalSheets).where(eq(offerTechnicalSheets.offerId, offerId));
     } else {
-      const [created] = await db.insert(offers).values(offerValues).returning({ id: offers.id });
+      const [created] = await db.insert(offers).values({ ...offerValues, createdBy: email }).returning({ id: offers.id });
       offerId = created.id;
     }
 
