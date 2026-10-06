@@ -8,6 +8,17 @@ interface CategoryPageProps {
   categorySlug: Category;
 }
 
+const doorExamples = [
+  {
+    image: "/images/pages/vrata-filo-muro.webp",
+    alt: "Sobna vrata u ravnini zida, bez vidljivog okvira",
+  },
+  {
+    image: "/images/pages/vrata-protuprovalna.webp",
+    alt: "Tamna protuprovalna ulazna vrata na pročelju kuće",
+  },
+];
+
 export default function CategoryPage({ categorySlug }: CategoryPageProps) {
   const category = categories.find((c) => c.slug === categorySlug)!;
   const others = categories.filter((c) => c.slug !== categorySlug);
@@ -19,14 +30,33 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
       {/* Hero */}
       <section className="relative h-[40vh] sm:h-[50vh] min-h-[320px] sm:min-h-[400px] flex items-end overflow-hidden">
         <div className="absolute inset-0">
-          <Image
-            src={category.image}
-            alt={category.name}
-            fill
-            sizes="100vw"
-            className="object-cover"
-            priority
-          />
+          {categorySlug === "vrata" ? (
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(2, minmax(0, 1fr))", gap: 4, height: "100%", background: "#1E2326" }}>
+              {doorExamples.map((door) => (
+                <div key={door.image} style={{ position: "relative", minWidth: 0, overflow: "hidden" }}>
+                  <div style={{ position: "absolute", top: 80, right: 0, bottom: 0, left: 0 }}>
+                    <Image
+                      src={door.image}
+                      alt={door.alt}
+                      fill
+                      sizes="50vw"
+                      style={{ objectFit: "contain" }}
+                      priority
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <Image
+              src={category.image}
+              alt={category.name}
+              fill
+              sizes="100vw"
+              className="object-cover"
+              priority
+            />
+          )}
           <div className="absolute inset-0 bg-gradient-to-t from-black/70 via-black/30 to-black/10" />
         </div>
         <div className="relative z-10 max-w-7xl mx-auto px-6 lg:px-12 pb-12 lg:pb-16 w-full">
@@ -42,6 +72,11 @@ export default function CategoryPage({ categorySlug }: CategoryPageProps) {
             {category.description}
           </p>
         </div>
+        {categorySlug === "vrata" && (
+          <p className="font-sans" style={{ position: "absolute", zIndex: 10, right: "1.5rem", bottom: ".75rem", color: "rgba(255, 255, 255, .7)", fontSize: ".625rem" }}>
+            Ilustrativni prikazi
+          </p>
+        )}
       </section>
 
       {/* Intro + features (placeholder content) */}

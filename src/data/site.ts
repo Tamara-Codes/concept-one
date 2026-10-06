@@ -10,12 +10,14 @@ export const site = {
   contacts: [
     {
       name: "Ivica",
+      specialty: "vanjska bravarija",
       phone: "+385915085666",
       phoneDisplay: "+385 91 508 5666",
       email: "ivica@conceptone.hr",
     },
     {
       name: "Saša",
+      specialty: "unutarnja stolarija",
       phone: "+385976074608",
       phoneDisplay: "+385 97 607 4608",
       email: "sasa@conceptone.hr",
@@ -60,7 +62,8 @@ export const categories: CategoryInfo[] = [
       "Prozori i balkonska vrata",
       "Klizne i harmonika stijene",
       "Fasadni sustavi",
-      "Zimski vrtovi i pergole",
+      "Zimski vrtovi",
+      "Ogradni sustavi",
     ],
   },
   {

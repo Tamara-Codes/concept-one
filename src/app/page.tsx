@@ -83,7 +83,7 @@ export default function HomePage() {
           <p className="animate-fade-up delay-200 font-sans text-base md:text-lg text-white/70 max-w-xl leading-relaxed mb-10">
             Aluminijska i PVC bravarija, unutarnja vrata, unutarnji i vanjski
             podovi, vanjske i unutarnje zidne obloge te ogradni sistemi. Sve za
-            vaš objekt na jednom mjestu — od izmjere do montaže.
+            Vaš projekt na jednom mjestu — od projektiranja, izrade do montaže.
           </p>
           <div className="animate-fade-up delay-300 flex flex-wrap gap-4">
             <Link
@@ -205,7 +205,7 @@ export default function HomePage() {
           <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 text-left">
             {site.contacts.map((contact) => (
               <div key={contact.email} className="border border-co-charcoal/10 bg-white/40 p-5 sm:p-6">
-                <p className="font-sans text-xs tracking-widest uppercase text-co-charcoal/50 mb-3">{contact.name}</p>
+                <p className="font-sans text-xs tracking-widest uppercase text-co-charcoal/50 mb-3">{contact.name} · {contact.specialty}</p>
                 <a href={`tel:${contact.phone}`} className="block font-serif text-2xl sm:text-3xl font-light text-co-charcoal hover:text-co-accent-dark transition-colors duration-300">
                   {contact.phoneDisplay}
                 </a>

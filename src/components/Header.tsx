@@ -3,7 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import Logo from "./Logo";
-import { site } from "@/data/site";
 
 const navLinks = [
   { href: "/", label: "Naslovna" },
@@ -13,14 +12,6 @@ const navLinks = [
   { href: "/pu-paneli", label: "Zidni paneli" },
   { href: "/o-nama", label: "O nama" },
 ];
-
-function PhoneIcon() {
-  return (
-    <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.5}>
-      <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 6.75c0 8.284 6.716 15 15 15h2.25a2.25 2.25 0 002.25-2.25v-1.372c0-.516-.351-.966-.852-1.091l-4.423-1.106c-.44-.11-.902.055-1.173.417l-.97 1.293c-.282.376-.769.542-1.21.38a12.035 12.035 0 01-7.143-7.143c-.162-.441.004-.928.38-1.21l1.293-.97c.363-.271.527-.734.417-1.173L6.963 3.102a1.125 1.125 0 00-1.091-.852H4.5A2.25 2.25 0 002.25 4.5v2.25z" />
-    </svg>
-  );
-}
 
 export default function Header() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -43,20 +34,6 @@ export default function Header() {
               </Link>
             ))}
           </nav>
-
-          {/* Desktop contacts */}
-          <div className="hidden lg:flex flex-col items-end gap-0.5">
-            {site.contacts.map((contact) => (
-              <a
-                key={contact.phone}
-                href={`tel:${contact.phone}`}
-                className="flex items-center gap-2 text-xs text-co-charcoal/60 hover:text-co-accent-dark transition-colors"
-              >
-                <PhoneIcon />
-                {contact.name}: {contact.phoneDisplay}
-              </a>
-            ))}
-          </div>
 
           {/* Mobile hamburger */}
           <button
@@ -84,20 +61,6 @@ export default function Header() {
               {link.label}
             </Link>
           ))}
-          <div className="border-t border-black/5 mt-2 pt-3">
-            <div className="flex flex-col">
-              {site.contacts.map((contact) => (
-                <a
-                  key={contact.phone}
-                  href={`tel:${contact.phone}`}
-                  className="inline-flex items-center gap-2 text-sm text-co-charcoal/60 hover:text-co-accent-dark transition-colors py-2"
-                >
-                  <PhoneIcon />
-                  {contact.name}: {contact.phoneDisplay}
-                </a>
-              ))}
-            </div>
-          </div>
         </nav>
       </div>
     </header>

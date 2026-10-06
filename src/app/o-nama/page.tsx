@@ -26,6 +26,17 @@ const advantages = [
   { title: "Montaža", text: "Vlastiti montažni timovi i garancija na ugradnju." },
 ];
 
+const brands = [
+  { name: "Schüco", image: "/images/brands/schueco.png" },
+  { name: "Alumil", image: "/images/brands/alumil.png" },
+  { name: "FEAL", image: "/images/brands/feal.png" },
+  { name: "Rehau", image: "/images/brands/rehau.png" },
+  { name: "Kömmerling", image: "/images/offer/brand-koemmerling.png" },
+  { name: "Medle", image: "/images/brands/medle.png" },
+  { name: "Hörmann", image: "/images/brands/hormann.png" },
+  { name: "Déco", image: "/images/offer/brand-deco.png" },
+];
+
 export default function ONamaPage() {
   return (
     <main className="min-h-screen">
@@ -114,6 +125,35 @@ export default function ONamaPage() {
         </div>
       </section>
 
+      {/* Brands from the offer */}
+      <section className="py-14 sm:py-20 lg:py-28">
+        <div className="max-w-7xl mx-auto px-6 lg:px-12">
+          <div className="text-center mb-14">
+            <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl font-light text-co-charcoal">
+              Brendovi u <span className="italic font-medium">našoj ponudi</span>
+            </h2>
+          </div>
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-4" aria-label="Brendovi u našoj ponudi">
+            {brands.map((brand) => (
+              <div
+                key={brand.name}
+                className="flex items-center justify-center border border-black/5 bg-white p-6"
+                style={{ minHeight: 132 }}
+              >
+                <Image
+                  src={brand.image}
+                  alt={brand.name}
+                  width={260}
+                  height={110}
+                  sizes="(min-width: 1024px) 25vw, (min-width: 768px) 50vw, 100vw"
+                  style={{ width: "100%", height: 92, objectFit: "contain" }}
+                />
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* Contact */}
       <section className="py-14 sm:py-20 lg:py-28 bg-co-charcoal">
         <div className="max-w-7xl mx-auto px-6 lg:px-12">
@@ -140,12 +180,11 @@ export default function ONamaPage() {
                   <p className="font-sans text-xs tracking-widest uppercase text-white/40 mb-2">Kontakt</p>
                   <div className="space-y-3 font-sans text-base text-white/70">
                     {site.contacts.map((contact) => (
-                      <p key={contact.email}>
-                        <span className="text-white/40">{contact.name}: </span>
-                        <a href={`tel:${contact.phone}`} className="hover:text-co-accent transition-colors">{contact.phoneDisplay}</a>
-                        <span className="text-white/30"> · </span>
-                        <a href={`mailto:${contact.email}`} className="hover:text-co-accent transition-colors">{contact.email}</a>
-                      </p>
+                      <div key={contact.email}>
+                        <p className="text-white/40">{contact.name} — {contact.specialty}</p>
+                        <a href={`tel:${contact.phone}`} className="block hover:text-co-accent transition-colors">{contact.phoneDisplay}</a>
+                        <a href={`mailto:${contact.email}`} className="block hover:text-co-accent transition-colors">{contact.email}</a>
+                      </div>
                     ))}
                   </div>
                 </div>

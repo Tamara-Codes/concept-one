@@ -9,3 +9,8 @@ All photos are from Pexels (Pexels licence: free for commercial use, no attribut
 - cat-pu-paneli.jpg — photo 9685870
 - about.jpg — photo 9729583 by Francesca Cinel
 - onama-hero.jpg — photo 8134820 by Max Vakhtbovych (Artbovich)
+
+Illustrative AI-generated door images (not photographs of Concept One installations):
+
+- vrata-filo-muro.webp — flush interior door
+- vrata-protuprovalna.webp — anti-burglary entrance door
