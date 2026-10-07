@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { site } from "@/data/site";
 
@@ -8,6 +8,8 @@ type Item = {
   id: string;
   desc: string;
   imageSrc: string;
+  imageKey: string;
+  imageContentType: string;
   imageName: string;
   qty: number;
   price: number;
@@ -52,6 +54,8 @@ type InitialOffer = {
   warrantyParagraphs: string[];
   items: Array<{
     description: string;
+    imageKey: string | null;
+    imageContentType: string | null;
     imageName: string | null;
     quantity: string | number;
     unitPrice: string | number;
@@ -70,6 +74,8 @@ function newItem(): Item {
     id: crypto.randomUUID(),
     desc: "",
     imageSrc: "",
+    imageKey: "",
+    imageContentType: "",
     imageName: "",
     qty: 0,
     price: 0,
@@ -84,6 +90,8 @@ function newSurchargeItem(): Item {
     id: crypto.randomUUID(),
     desc: "",
     imageSrc: "",
+    imageKey: "",
+    imageContentType: "",
     imageName: "",
     qty: 0,
     price: 0,
@@ -159,6 +167,11 @@ function OfferPageHeading({ title, subtitle }: { title: string; subtitle: string
 
 export default function PonudaForm({ technicalSheets = [], initialOffer }: { technicalSheets?: TechnicalSheet[]; initialOffer?: InitialOffer }) {
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "exists" | "error">("idle");
+  const [saveError, setSaveError] = useState("");
+  const [savedOfferId, setSavedOfferId] = useState<string | null>(initialOffer?.id ?? null);
+  const editVersion = useRef(0);
+  const initialized = useRef(false);
+  const skipNextEditEffect = useRef(false);
   const [offerNumber, setOfferNumber] = useState(initialOffer?.offerNumber ?? "001-2026");
   const [offerDate, setOfferDate] = useState(initialOffer?.offerDate ?? new Date().toLocaleDateString("hr-HR"));
   const [validUntil, setValidUntil] = useState(initialOffer?.validUntil ?? "");
@@ -171,7 +184,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
   const [coContact, setCoContact] = useState(initialOffer?.coContact ?? `${site.contacts[0].name} · ${site.contacts[0].phoneDisplay}`);
   const [coEmail, setCoEmail] = useState(initialOffer?.coEmail ?? site.contacts[0].email);
 
-  const [items, setItems] = useState<Item[]>(initialOffer?.items?.length ? initialOffer.items.map((item) => ({ ...newItem(), id: crypto.randomUUID(), desc: item.description, imageName: item.imageName ?? "", qty: Number(item.quantity), price: Number(item.unitPrice), discountPct: Number(item.discountPct), dimensions: item.dimensions, isSurcharge: item.isSurcharge })) : [newItem()]);
+  const [items, setItems] = useState<Item[]>(initialOffer?.items?.length ? initialOffer.items.map((item) => ({ ...newItem(), id: crypto.randomUUID(), desc: item.description, imageKey: item.imageKey ?? "", imageContentType: item.imageContentType ?? "", imageSrc: item.imageKey ? `/api/offers/image?key=${encodeURIComponent(item.imageKey)}` : "", imageName: item.imageName ?? "", qty: Number(item.quantity), price: Number(item.unitPrice), discountPct: Number(item.discountPct), dimensions: item.dimensions, isSurcharge: item.isSurcharge })) : [newItem()]);
   const [discountPct, setDiscountPct] = useState(Number(initialOffer?.discountPct ?? 0));
   const [showDiscount, setShowDiscount] = useState(initialOffer?.showDiscount ?? false);
   const [vatRate, setVatRate] = useState(Number(initialOffer?.vatRate ?? 25));
@@ -192,6 +205,19 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
     "Prodavatelj daje jamstvo u trajanju od 5 godina na profile i postojanost boje, okove i mehanizme te termoizolacijske staklene jedinice. Također, prodavatelj daje jamstvo u trajanju od 2 godine na dodatnu opremu (rolete, komarnike i slično), osim u slučajevima mehaničkih oštećenja, nepravilne uporabe, neadekvatnog održavanja ili nepridržavanja uputa za uporabu.",
     "Jamstvo ne obuhvaća oštećenja nastala tijekom prijevoza, rukovanja na lokaciji ili montaže, kao ni oštećenja koja su posljedica nepravilnog skladištenja, manipulacije ili ugradnje od strane trećih osoba.",
   ]);
+
+  useEffect(() => {
+    if (!initialized.current) {
+      initialized.current = true;
+      return;
+    }
+    if (skipNextEditEffect.current) {
+      skipNextEditEffect.current = false;
+      return;
+    }
+    editVersion.current += 1;
+    setSaveState((state) => state === "saving" ? "saving" : "idle");
+  }, [offerNumber, offerDate, validUntil, clientName, clientAddress, clientPhone, clientEmail, coContact, coEmail, items, discountPct, showDiscount, vatRate, paymentTerms, deliveryTerms, termsPageTitle, termsPageSubtitle, notesHeading, offerNotes, warrantyHeading, warrantyParagraphs]);
 
   function updateItem(id: string, patch: Partial<Item>) {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
@@ -246,6 +272,8 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
     reader.onload = () =>
       updateItem(id, {
         imageSrc: String(reader.result),
+        imageKey: "",
+        imageContentType: file.type,
         imageName: file.name || "Slika proizvoda",
       });
     reader.readAsDataURL(file);
@@ -262,13 +290,46 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
   const grandTotal = vatBase + vatAmount;
 
   async function saveOffer() {
+    const versionBeingSaved = editVersion.current;
     setSaveState("saving");
+    setSaveError("");
     try {
+      const itemsForSave = [];
+      for (const item of items) {
+        let imageKey = item.imageKey || null;
+        if (!imageKey && item.imageSrc.startsWith("data:")) {
+          const blob = await (await fetch(item.imageSrc)).blob();
+          if (blob.size > 4 * 1024 * 1024) throw new Error("Slika je prevelika (najviše 4 MB).");
+          const upload = await fetch("/api/offers/image", {
+            method: "POST",
+            headers: { "Content-Type": item.imageContentType },
+            body: blob,
+          });
+          if (!upload.ok) {
+            const details = await upload.json().catch(() => ({}));
+            throw new Error(details.error || "Slika se nije mogla spremiti.");
+          }
+          const uploaded: { key: string } = await upload.json();
+          imageKey = uploaded.key;
+        }
+        itemsForSave.push({
+          position: itemsForSave.length,
+          description: item.desc,
+          imageKey,
+          imageName: item.imageName || null,
+          imageContentType: item.imageContentType || null,
+          quantity: item.qty,
+          unitPrice: item.price,
+          discountPct: item.discountPct,
+          dimensions: item.dimensions,
+          isSurcharge: item.isSurcharge,
+        });
+      }
       const response = await fetch("/api/offers", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          offerId: initialOffer?.id,
+          offerId: savedOfferId,
           offerNumber,
           offerDate,
           validUntil,
@@ -290,18 +351,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           warrantyHeading,
           warrantyParagraphs,
           technicalSheetIds: technicalSheets.map((sheet) => sheet.id),
-          items: items.map((item, index) => ({
-            position: index,
-            description: item.desc,
-            imageKey: null,
-            imageName: item.imageName || null,
-            imageContentType: null,
-            quantity: item.qty,
-            unitPrice: item.price,
-            discountPct: item.discountPct,
-            dimensions: item.dimensions,
-            isSurcharge: item.isSurcharge,
-          })),
+          items: itemsForSave,
         }),
       });
       if (response.status === 409) {
@@ -309,8 +359,20 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         return;
       }
       if (!response.ok) throw new Error("Spremanje nije uspjelo");
-      setSaveState("saved");
-    } catch {
+      const result: { id: string; imageKeys: (string | null)[] } = await response.json();
+      setSavedOfferId(result.id);
+      if (!savedOfferId) {
+        window.history.replaceState(null, "", `/ponuda/new/edit?offerId=${encodeURIComponent(result.id)}`);
+      }
+      if (editVersion.current === versionBeingSaved) {
+        skipNextEditEffect.current = true;
+        setItems((current) => current.map((item, index) => ({ ...item, imageKey: result.imageKeys[index] ?? "" })));
+        setSaveState("saved");
+      } else {
+        setSaveState("idle");
+      }
+    } catch (error) {
+      setSaveError(error instanceof Error ? error.message : "Spremanje nije uspjelo.");
       setSaveState("error");
     }
   }
@@ -318,13 +380,13 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
   return (
     <div className="min-h-screen bg-co-warm-dark py-10 print:bg-white print:py-0">
       <div className="no-print max-w-[210mm] mx-auto px-4 mb-4 flex items-center justify-between">
-        <a href={initialOffer ? "/ponuda/saved" : "/ponuda"} className="text-sm text-co-charcoal/50 hover:text-co-accent-dark transition-colors">
+        <a href={savedOfferId ? "/ponuda/saved" : "/ponuda"} className="text-sm text-co-charcoal/50 hover:text-co-accent-dark transition-colors">
           &larr; Natrag na ponude
         </a>
         <div className="flex items-center gap-3">
           <button
             onClick={saveOffer}
-            disabled={saveState === "saving" || saveState === "saved" || saveState === "exists"}
+            disabled={saveState === "saving" || saveState === "saved"}
             className="text-sm font-semibold px-5 py-2 rounded-md border border-co-charcoal/20 bg-white text-co-charcoal hover:bg-co-warm transition-colors disabled:cursor-default disabled:opacity-60"
           >
             {saveState === "saving" ? "Spremam…" : saveState === "saved" ? "Spremljeno" : saveState === "exists" ? "Već spremljeno" : "Spremi ponudu"}
@@ -336,7 +398,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
             Ispi&scaron;i / Spremi kao PDF
           </button>
           {saveState === "exists" && <span className="text-sm text-slate-600">Broj ponude već postoji u arhivi.</span>}
-          {saveState === "error" && <span className="text-sm text-red-700">Spremanje nije uspjelo.</span>}
+          {saveState === "error" && <span className="text-sm text-red-700">{saveError}</span>}
         </div>
       </div>
 
@@ -576,7 +638,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
                       <button
                         type="button"
                         className="no-print d3-item-image-remove"
-                        onClick={() => updateItem(it.id, { imageSrc: "", imageName: "" })}
+                        onClick={() => updateItem(it.id, { imageSrc: "", imageKey: "", imageContentType: "", imageName: "" })}
                       >
                         Ukloni sliku
                       </button>

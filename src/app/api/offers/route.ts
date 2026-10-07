@@ -1,9 +1,11 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
+import { HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getDb } from "@/lib/db";
 import { getAuth } from "@/lib/auth";
 import { getAllowedOfferUser } from "@/lib/offer-access";
 import { offerItems, offerTechnicalSheets, offers } from "@/lib/db/schema";
+import { getR2BucketName, getR2Client } from "@/lib/storage/r2";
 
 function isoDate(value: unknown) {
   if (typeof value !== "string" || !value.trim()) return new Date().toISOString().slice(0, 10);
@@ -50,6 +52,28 @@ export async function POST(request: Request) {
         warrantyParagraphs: Array.isArray(body.warrantyParagraphs) ? body.warrantyParagraphs.map(String) : [],
         updatedBy: email,
       };
+    const existingImageKeys = new Set<string>();
+    if (typeof body.offerId === "string" && body.offerId) {
+      const savedItems = await db.select({ imageKey: offerItems.imageKey }).from(offerItems).where(eq(offerItems.offerId, body.offerId));
+      for (const item of savedItems) if (item.imageKey) existingImageKeys.add(item.imageKey);
+    }
+    const preparedItems: (Record<string, unknown> & { imageKey: string | null; imageContentType: string | null })[] = [];
+    for (const item of body.items as Record<string, unknown>[]) {
+      let imageKey = typeof item.imageKey === "string" ? item.imageKey : null;
+      let imageContentType = typeof item.imageContentType === "string" ? item.imageContentType : null;
+      if (imageKey && !existingImageKeys.has(imageKey)) {
+        if (!/^offers\/images\/[0-9a-f-]{36}\.(?:png|jpg|webp|gif)$/.test(imageKey)) {
+          return NextResponse.json({ error: "Unknown offer image" }, { status: 400 });
+        }
+        try {
+          const object = await getR2Client().send(new HeadObjectCommand({ Bucket: getR2BucketName(), Key: imageKey }));
+          imageContentType = object.ContentType || imageContentType;
+        } catch {
+          return NextResponse.json({ error: "Unknown offer image" }, { status: 400 });
+        }
+      }
+      preparedItems.push({ ...item, imageKey, imageContentType });
+    }
     let offerId: string;
     if (typeof body.offerId === "string" && body.offerId) {
       const [updated] = await db.update(offers).set({ ...offerValues, updatedBy: email, updatedAt: new Date() }).where(eq(offers.id, body.offerId)).returning({ id: offers.id });
@@ -62,9 +86,9 @@ export async function POST(request: Request) {
       offerId = created.id;
     }
 
-    if (body.items.length) {
+    if (preparedItems.length) {
       await db.insert(offerItems).values(
-        body.items.map((item: Record<string, unknown>, index: number) => ({
+        preparedItems.map((item, index) => ({
           offerId,
           position: Number(item.position ?? index),
           description: String(item.description ?? ""),
@@ -87,7 +111,7 @@ export async function POST(request: Request) {
       );
     }
 
-    return NextResponse.json({ id: offerId }, { status: body.offerId ? 200 : 201 });
+    return NextResponse.json({ id: offerId, imageKeys: preparedItems.map((item) => item.imageKey) }, { status: body.offerId ? 200 : 201 });
   } catch (error) {
     console.error("Failed to save offer", error);
     const dbError = error as { cause?: { code?: string } };
