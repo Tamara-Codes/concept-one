@@ -4,6 +4,7 @@ import { getDb } from "@/lib/db";
 import { offers } from "@/lib/db/schema";
 import { getAllowedOfferUser } from "@/lib/offer-access";
 import Logo from "@/components/Logo";
+import DeleteOfferButton from "./DeleteOfferButton";
 import styles from "./saved.module.css";
 
 export const metadata = { title: "Spremljene ponude | Concept One" };
@@ -55,23 +56,26 @@ export default async function SavedOffersPage() {
         ) : (
           <section className={styles.offerList} aria-label="Spremljene ponude">
             {savedOffers.map((offer) => (
-              <a key={offer.id} href={`/ponuda/new/edit?offerId=${offer.id}`} className={styles.offerCard}>
+              <article key={offer.id} className={styles.offerRow}>
                 <span className={styles.goldLine} aria-hidden="true" />
-                <div className={styles.offerIdentity}>
-                  <span className={styles.status}><i />{offer.status === "draft" ? "Skica" : offer.status}</span>
-                  <h2>{offer.offerNumber}</h2>
-                  <p>{offer.clientName || "Klijent nije upisan"}</p>
-                </div>
-                <div className={styles.offerMeta}>
-                  <span>Datum ponude</span>
-                  <strong>{formatDate(offer.offerDate)}</strong>
-                  <small>Ažurirano {offer.updatedAt.toLocaleDateString("hr-HR")}</small>
-                </div>
-                <div className={styles.openAction}>
-                  <span>Otvori</span>
-                  <b>→</b>
-                </div>
-              </a>
+                <a href={`/ponuda/new/edit?offerId=${offer.id}`} className={styles.offerCard}>
+                  <div className={styles.offerIdentity}>
+                    <span className={styles.status}><i />{offer.status === "draft" ? "Skica" : offer.status}</span>
+                    <h2>{offer.offerNumber}</h2>
+                    <p>{offer.clientName || "Klijent nije upisan"}</p>
+                  </div>
+                  <div className={styles.offerMeta}>
+                    <span>Datum ponude</span>
+                    <strong>{formatDate(offer.offerDate)}</strong>
+                    <small>Ažurirano {offer.updatedAt.toLocaleDateString("hr-HR")}</small>
+                  </div>
+                  <div className={styles.openAction}>
+                    <span>Otvori</span>
+                    <b>→</b>
+                  </div>
+                </a>
+                <DeleteOfferButton id={offer.id} offerNumber={offer.offerNumber} />
+              </article>
             ))}
           </section>
         )}
