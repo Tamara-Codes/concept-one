@@ -1,4 +1,5 @@
 import { desc } from "drizzle-orm";
+import { connection } from "next/server";
 import { getDb } from "@/lib/db";
 import { offers } from "@/lib/db/schema";
 import { getAllowedOfferUser } from "@/lib/offer-access";
@@ -13,6 +14,7 @@ function formatDate(value: string) {
 }
 
 export default async function SavedOffersPage() {
+  await connection();
   const allowedUser = await getAllowedOfferUser();
   const savedOffers = allowedUser
     ? await getDb()
