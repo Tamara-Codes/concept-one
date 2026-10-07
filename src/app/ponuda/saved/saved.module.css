@@ -226,7 +226,105 @@
 
 .deleteButton:hover { text-decoration: underline; }
 .deleteButton:disabled { cursor: wait; opacity: 0.6; }
-.deleteError { margin: 0; color: #9b3333; font-size: 11px; text-align: center; }
+
+.confirmDialog {
+  width: min(440px, calc(100vw - 32px));
+  max-height: calc(100dvh - 32px);
+  margin: auto;
+  padding: 0;
+  overflow: auto;
+  border: 1px solid rgba(30, 35, 38, 0.12);
+  border-radius: 20px;
+  background: #fff;
+  color: #1e2326;
+  box-shadow: 0 28px 80px rgba(12, 19, 23, 0.26);
+}
+
+.confirmDialog::backdrop {
+  background: rgba(18, 25, 29, 0.58);
+  backdrop-filter: blur(3px);
+}
+
+.confirmContent {
+  padding: 32px;
+  border-top: 4px solid #9b3333;
+}
+
+.confirmEyebrow {
+  margin: 0 0 14px;
+  color: #9b3333;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.16em;
+}
+
+.confirmTitle {
+  margin: 0;
+  font-family: var(--font-serif);
+  font-size: 32px;
+  font-weight: 400;
+  line-height: 1.15;
+}
+
+.confirmNumber {
+  margin: 20px 0 0;
+  padding: 13px 16px;
+  overflow-wrap: anywhere;
+  border: 1px solid rgba(30, 35, 38, 0.1);
+  border-radius: 10px;
+  background: #f6f6f4;
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.confirmDescription {
+  margin: 18px 0 0;
+  color: #596168;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.confirmError {
+  margin: 16px 0 0;
+  color: #9b3333;
+  font-size: 13px;
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  margin-top: 28px;
+}
+
+.cancelButton,
+.confirmDeleteButton {
+  min-height: 44px;
+  padding: 10px 16px;
+  border-radius: 9px;
+  cursor: pointer;
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.cancelButton {
+  border: 1px solid rgba(30, 35, 38, 0.17);
+  background: #fff;
+  color: #1e2326;
+}
+
+.cancelButton:hover { background: #f3f4f2; }
+
+.confirmDeleteButton {
+  border: 1px solid #9b3333;
+  background: #9b3333;
+  color: #fff;
+}
+
+.confirmDeleteButton:hover { background: #7f2929; }
+.cancelButton:disabled,
+.confirmDeleteButton:disabled { cursor: wait; opacity: 0.65; }
 
 .empty {
   padding: 36px;
@@ -255,4 +353,7 @@
   .offerCard { grid-template-columns: 1fr; }
   .openAction { grid-column: 1; grid-row: auto; min-height: 52px; flex-direction: row; }
   .deleteArea { min-height: 52px; border-top: 1px solid rgba(30, 35, 38, 0.08); border-left: 0; }
+  .confirmContent { padding: 26px 22px; }
+  .confirmActions { flex-direction: column; }
+  .cancelButton, .confirmDeleteButton { width: 100%; }
 }
