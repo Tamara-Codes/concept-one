@@ -19,9 +19,6 @@ type Item = {
 };
 
 const eur = new Intl.NumberFormat("hr-HR", { style: "currency", currency: "EUR" });
-const offerSectionVisibility = {
-  projects: false,
-};
 
 const offerBrands = [
   { name: "Schüco", image: "/images/brands/schueco.png" },
@@ -36,6 +33,18 @@ const offerBrands = [
   { name: "GD Dorigo", image: "/images/offer/brand-gd-dorigo.png" },
   { name: "Dierre", image: "/images/offer/brand-dierre.png" },
   { name: "Enterijer Massiv", image: "/images/offer/brand-enterijer-massiv.png" },
+];
+
+const offerProjects = [
+  { image: "filo-muro.webp", title: "Unutarnja vrata FILO MURO" },
+  { image: "room-door.webp", title: "Moderna sobna vrata" },
+  { image: "sliding-glass-wall.webp", title: "Aluminijske klizne stijene" },
+  { image: "aluminium-shutters.webp", title: "Aluminijske grilje" },
+  { image: "brise-soleil.webp", title: "Brisoleji" },
+  { image: "roller-shutter-window.webp", title: "PVC prozori s roletama" },
+  { image: "ventilated-facade.webp", title: "Ventilirane fasade" },
+  { image: "pergola.webp", title: "Pergole" },
+  { image: "garage-door.webp", title: "Moderna garažna vrata" },
 ];
 
 type TechnicalSheet = {
@@ -170,12 +179,12 @@ function OfferPageFooter() {
   );
 }
 
-function OfferPageHeading({ title, subtitle }: { title: string; subtitle: string }) {
+function OfferPageHeading({ title, subtitle }: { title: string; subtitle?: string }) {
   return (
     <header className="offer-static-heading">
       <div className="offer-static-brand">CONCEPT ONE</div>
       <h2>{title}</h2>
-      <p>{subtitle}</p>
+      {subtitle && <p>{subtitle}</p>}
       <div className="offer-gold-rule" />
     </header>
   );
@@ -981,24 +990,28 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
               </li>
             ))}
           </ul>
-          {offerSectionVisibility.projects && (
-            <>
-              <div className="offer-project-heading">
-                <h2>Naši projekti</h2>
-                <p>Odabrani projekti iz našeg portfelja</p>
-                <div className="offer-gold-rule" />
-              </div>
-              <div className="offer-project-image">
-                <Image
-                  src="/images/offer/projects.png"
-                  alt="Odabrani projekti"
-                  fill
-                  sizes="178mm"
-                  className="object-cover"
-                />
-              </div>
-            </>
-          )}
+          <OfferPageFooter />
+        </section>
+
+        <section className="offer-page offer-projects-page">
+          <OfferPageHeading title="Naši projekti" />
+          <div className="offer-project-grid">
+            {offerProjects.map((project) => (
+              <figure key={project.image}>
+                <div className="offer-project-photo">
+                  <Image
+                    src={`/images/offer/projects/${project.image}`}
+                    alt=""
+                    fill
+                    unoptimized
+                    loading="eager"
+                    className="object-cover"
+                  />
+                </div>
+                <figcaption>{project.title}</figcaption>
+              </figure>
+            ))}
+          </div>
           <OfferPageFooter />
         </section>
 
@@ -1147,8 +1160,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           letter-spacing: 0.08em;
         }
         .offer-about-copy h2,
-        .offer-static-heading h2,
-        .offer-project-heading h2 {
+        .offer-static-heading h2 {
           margin: 7mm 0 0;
           color: #202225;
           font-family: "Fraunces", Georgia, serif;
@@ -1213,8 +1225,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         .offer-static-heading h2 {
           margin-top: 7mm;
         }
-        .offer-static-heading p,
-        .offer-project-heading p {
+        .offer-static-heading p {
           margin: 4mm 0 0;
           color: #54595d;
           font-size: 12pt;
@@ -1320,21 +1331,30 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         .offer-brand-logo {
           position: relative;
         }
-        .offer-project-heading {
-          padding: 8mm 15mm 0;
+        .offer-projects-page {
+          padding-bottom: 28mm;
         }
-        .offer-project-heading h2 {
-          margin-top: 0;
-          font-size: 27pt;
+        .offer-project-grid {
+          display: grid;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          gap: 5mm;
+          margin: 9mm 15mm 0;
         }
-        .offer-project-heading .offer-gold-rule {
-          margin-top: 6mm;
+        .offer-project-grid figure {
+          margin: 0;
         }
-        .offer-project-image {
+        .offer-project-photo {
           position: relative;
-          width: calc(100% - 30mm);
-          height: 99mm;
-          margin: 8mm 15mm 28mm;
+          aspect-ratio: 1;
+          overflow: hidden;
+          border-radius: 1.5mm;
+        }
+        .offer-project-grid figcaption {
+          margin-top: 1.5mm;
+          color: #202225;
+          font-size: 9.5pt;
+          font-weight: 600;
+          line-height: 1.3;
         }
         .offer-technical-copy {
           padding: 10mm 15mm 0;
