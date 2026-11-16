@@ -23,6 +23,21 @@ const offerSectionVisibility = {
   projects: false,
 };
 
+const offerBrands = [
+  { name: "Schüco", image: "/images/brands/schueco.png" },
+  { name: "Alumil", image: "/images/brands/alumil.png" },
+  { name: "FEAL", image: "/images/brands/feal.png" },
+  { name: "Rehau", image: "/images/brands/rehau.png" },
+  { name: "Kömmerling", image: "/images/offer/brand-koemmerling.png" },
+  { name: "Medle", image: "/images/brands/medle.png" },
+  { name: "Hörmann", image: "/images/brands/hormann.png" },
+  { name: "Déco", image: "/images/offer/brand-deco.png" },
+  { name: "LIP BLED", image: "/images/offer/brand-lip-bled.png" },
+  { name: "GD Dorigo", image: "/images/offer/brand-gd-dorigo.png" },
+  { name: "Dierre", image: "/images/offer/brand-dierre.png" },
+  { name: "Enterijer Massiv", image: "/images/offer/brand-enterijer-massiv.png" },
+];
+
 type TechnicalSheet = {
   id: string;
   name: string;
@@ -952,34 +967,20 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
             title="Brendovi u našoj ponudi"
             subtitle="Suradnja s provjerenim proizvođačima"
           />
-          <div className="offer-brand-logos">
-            <div className="offer-brand-grid" aria-label="Brendovi u ponudi">
-              <div className="offer-brand-logo offer-brand-sprite offer-brand-schueco" role="img" aria-label="Schüco" />
-              <div className="offer-brand-logo offer-brand-sprite offer-brand-alumil" role="img" aria-label="Alumil" />
-              <div className="offer-brand-logo offer-brand-sprite offer-brand-feal" role="img" aria-label="FEAL" />
-              <div className="offer-brand-logo offer-brand-sprite offer-brand-rehau" role="img" aria-label="Rehau" />
-              <div className="offer-brand-logo">
+          <ul className="offer-brand-grid" aria-label="Brendovi u ponudi">
+            {offerBrands.map((brand) => (
+              <li className="offer-brand-logo" key={brand.name}>
                 <Image
-                  src="/images/offer/brand-koemmerling.png"
-                  alt="Kömmerling"
+                  src={brand.image}
+                  alt={brand.name}
                   fill
-                  sizes="40mm"
+                  loading="eager"
+                  unoptimized
                   className="object-contain"
                 />
-              </div>
-              <div className="offer-brand-logo offer-brand-sprite offer-brand-medle" role="img" aria-label="Medle" />
-              <div className="offer-brand-logo offer-brand-sprite offer-brand-hormann" role="img" aria-label="Hörmann" />
-              <div className="offer-brand-logo">
-                <Image
-                  src="/images/offer/brand-deco.png"
-                  alt="Déco"
-                  fill
-                  sizes="40mm"
-                  className="object-contain"
-                />
-              </div>
-            </div>
-          </div>
+              </li>
+            ))}
+          </ul>
           {offerSectionVisibility.projects && (
             <>
               <div className="offer-project-heading">
@@ -1307,47 +1308,17 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           font-size: 11pt;
           line-height: 1.6;
         }
-        .offer-brand-logos {
-          position: relative;
-          width: calc(100% - 30mm);
-          height: 64mm;
-          margin: 11mm 15mm 0;
-        }
         .offer-brand-grid {
           display: grid;
-          grid-template-columns: repeat(4, minmax(0, 1fr));
-          grid-template-rows: repeat(2, minmax(0, 1fr));
-          gap: 7mm 5mm;
-          width: 100%;
-          height: 100%;
+          grid-template-columns: repeat(3, minmax(0, 1fr));
+          grid-auto-rows: 29mm;
+          gap: 8mm 9mm;
+          margin: 14mm 15mm 0;
+          padding: 0;
+          list-style: none;
         }
         .offer-brand-logo {
           position: relative;
-          min-width: 0;
-          min-height: 0;
-        }
-        .offer-brand-sprite {
-          background-image: url("/images/offer/brand-logos.png");
-          background-repeat: no-repeat;
-          background-size: 400% 200%;
-        }
-        .offer-brand-schueco {
-          background-position: 0 0;
-        }
-        .offer-brand-alumil {
-          background-position: 0 100%;
-        }
-        .offer-brand-feal {
-          background-position: 33.333% 0;
-        }
-        .offer-brand-rehau {
-          background-position: 66.667% 0;
-        }
-        .offer-brand-medle {
-          background-position: 33.333% 100%;
-        }
-        .offer-brand-hormann {
-          background-position: 66.667% 100%;
         }
         .offer-project-heading {
           padding: 8mm 15mm 0;
