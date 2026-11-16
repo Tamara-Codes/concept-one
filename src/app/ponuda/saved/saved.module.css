@@ -157,6 +157,7 @@
   margin: 0;
   color: #697177;
   font-size: 14px;
+  overflow-wrap: anywhere;
 }
 
 .offerMeta {

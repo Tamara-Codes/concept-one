@@ -28,13 +28,13 @@ export const site = {
   address: "Ćikovići 128, 51215 Kastav",
   oib: "51970776577",
   mb: "05347653",
-  // TODO: Get the active IBAN and bank from the client.
   mbs: "040422234",
   director: "Tomislav Milardović",
   capital: "2.500,00 EUR, uplaćen u cijelosti",
   court: "Trgovački sud u Rijeci",
+  // TODO: Get the bank name from the client.
   bank: "Naziv banke d.d.",
-  iban: "HR00 0000 0000 0000 0000 0",
+  iban: "HR76 2402 0061 1010 0414 4",
   facebook: "https://facebook.com/",
   instagram: "https://instagram.com/",
 };

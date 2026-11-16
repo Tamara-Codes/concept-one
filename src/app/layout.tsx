@@ -16,7 +16,8 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="hr">
+    // The sign-in theme script updates the root attributes before hydration.
+    <html lang="hr" suppressHydrationWarning>
       <body className="antialiased">
         {children}
         <Analytics />

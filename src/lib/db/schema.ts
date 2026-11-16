@@ -31,6 +31,7 @@ export const offers = pgTable(
     offerNumber: text("offer_number").notNull(),
     offerDate: date("offer_date").notNull().defaultNow(),
     validUntil: date("valid_until"),
+    objekat: text("objekat").notNull().default(""),
     clientName: text("client_name").notNull().default(""),
     clientAddress: text("client_address").notNull().default(""),
     clientPhone: text("client_phone").notNull().default(""),

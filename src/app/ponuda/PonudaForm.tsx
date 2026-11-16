@@ -35,6 +35,7 @@ type InitialOffer = {
   offerNumber: string;
   offerDate: string;
   validUntil: string | null;
+  objekat: string;
   clientName: string;
   clientAddress: string;
   clientPhone: string;
@@ -175,6 +176,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
   const [offerNumber, setOfferNumber] = useState(initialOffer?.offerNumber ?? "001-2026");
   const [offerDate, setOfferDate] = useState(initialOffer?.offerDate ?? new Date().toLocaleDateString("hr-HR"));
   const [validUntil, setValidUntil] = useState(initialOffer?.validUntil ?? "");
+  const [objekat, setObjekat] = useState(initialOffer?.objekat ?? "");
 
   const [clientName, setClientName] = useState(initialOffer?.clientName ?? "");
   const [clientAddress, setClientAddress] = useState(initialOffer?.clientAddress ?? "");
@@ -217,7 +219,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
     }
     editVersion.current += 1;
     setSaveState((state) => state === "saving" ? "saving" : "idle");
-  }, [offerNumber, offerDate, validUntil, clientName, clientAddress, clientPhone, clientEmail, coContact, coEmail, items, discountPct, showDiscount, vatRate, paymentTerms, deliveryTerms, termsPageTitle, termsPageSubtitle, notesHeading, offerNotes, warrantyHeading, warrantyParagraphs]);
+  }, [offerNumber, offerDate, validUntil, objekat, clientName, clientAddress, clientPhone, clientEmail, coContact, coEmail, items, discountPct, showDiscount, vatRate, paymentTerms, deliveryTerms, termsPageTitle, termsPageSubtitle, notesHeading, offerNotes, warrantyHeading, warrantyParagraphs]);
 
   function updateItem(id: string, patch: Partial<Item>) {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
@@ -333,6 +335,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           offerNumber,
           offerDate,
           validUntil,
+          objekat,
           clientName,
           clientAddress,
           clientPhone,
@@ -432,13 +435,15 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
                 <span>DATUM PONUDE</span>
                 <input value={offerDate} onChange={(e) => setOfferDate(e.target.value)} />
               </label>
-              <label>
-                <span>PONUDA VRIJEDI DO</span>
+              <label className={objekat.trim() ? undefined : "no-print"}>
+                <span>OBJEKAT</span>
                 <input
-                  value={validUntil}
-                  onChange={(e) => setValidUntil(e.target.value)}
-                  placeholder="dd.mm.gggg."
+                  className="no-print"
+                  value={objekat}
+                  onChange={(e) => setObjekat(e.target.value)}
+                  placeholder="Naziv ili adresa objekta"
                 />
+                <span className="offer-cover-field-value">{objekat.trim()}</span>
               </label>
             </div>
           </div>
@@ -462,20 +467,26 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
             <div className="offer-static-brand">CONCEPT ONE</div>
             <h2>O nama</h2>
             <h3>Jedan partner za cijeli objekt</h3>
+            <p className="offer-about-list-intro">Concept One nudi:</p>
+            <ul>
+              <li>Aluminijsku bravariju</li>
+              <li>PVC stolariju</li>
+              <li>Ulazna vrata</li>
+              <li>Sobna vrata</li>
+              <li>Garažna vrata</li>
+              <li>Zaštitu od sunca</li>
+              <li>Ogradne sisteme</li>
+              <li>Sustav kontrole prolaza</li>
+              <li>Vanjske i unutarnje dekorativne zidne panele</li>
+              <li>Unutarnje i vanjske podne obloge</li>
+            </ul>
             <p>
-              Concept One nudi aluminijsku i PVC bravariju, vrata, podove i PU panele. Odabiremo
-              rješenja koja odgovaraju vašem projektu i pratimo vas od savjetovanja do ugradnje.
+              Odabiremo rješenja koja odgovaraju vašem projektu i pratimo vas od savjetovanja do ugradnje.
             </p>
             <p>
               Surađujemo s provjerenim proizvođačima i pomažemo pri odabiru materijala, završnih
               obrada i tehničkih rješenja za stambene i poslovne prostore.
             </p>
-            <ul>
-              <li>Aluminijska i PVC bravarija</li>
-              <li>Vrata</li>
-              <li>Podovi</li>
-              <li>Zidni paneli</li>
-            </ul>
           </div>
           <OfferPageFooter />
         </section>
@@ -1067,7 +1078,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         .offer-cover-fields label {
           display: block;
         }
-        .offer-cover-fields span {
+        .offer-cover-fields label > span:first-child {
           display: block;
           margin-bottom: 2.5mm;
           color: #8f7044;
@@ -1075,8 +1086,8 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           font-weight: 800;
           letter-spacing: 0.04em;
         }
-        .offer-cover-fields input {
-          display: block;
+        .offer-cover-fields input,
+        .offer-cover-field-value {
           width: 100%;
           border: 0;
           border-bottom: 1px solid #b5945f;
@@ -1085,6 +1096,13 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           padding: 0 0 2.5mm;
           color: #202225;
           font: 14pt/1.2 "Manrope", system-ui, sans-serif;
+        }
+        .offer-cover-fields input {
+          display: block;
+        }
+        .offer-cover-field-value {
+          display: none;
+          overflow-wrap: anywhere;
         }
         .offer-cover-fields input:focus {
           border-bottom-color: #202225;
@@ -1149,14 +1167,24 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           font-size: 11pt;
           line-height: 1.55;
         }
-        .offer-about-copy ul {
-          margin: 12mm 0 0;
-          padding: 0;
-          list-style: none;
-          font-family: "Fraunces", Georgia, serif;
-          font-size: 15pt;
+        .offer-about-copy .offer-about-list-intro {
+          margin-bottom: 3mm;
           font-weight: 700;
-          line-height: 1.55;
+        }
+        .offer-about-copy ul {
+          margin: 0 0 8mm;
+          padding-inline-start: 4.5mm;
+          list-style: disc outside;
+          font-family: "Fraunces", Georgia, serif;
+          font-size: 12pt;
+          font-weight: 700;
+          line-height: 1.4;
+        }
+        .offer-about-copy li + li {
+          margin-top: 1.2mm;
+        }
+        .offer-about-copy li::marker {
+          color: #8f7044;
         }
         .offer-page-footer {
           position: absolute;
@@ -1741,6 +1769,9 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         @media print {
           .no-print {
             display: none !important;
+          }
+          .offer-cover-field-value {
+            display: block;
           }
           .field {
             border-bottom: none !important;

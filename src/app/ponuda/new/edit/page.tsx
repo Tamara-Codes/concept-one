@@ -45,6 +45,7 @@ export default async function NewOfferEditorPage({
         offerNumber: savedOffer.offerNumber,
         offerDate: savedOffer.offerDate,
         validUntil: savedOffer.validUntil,
+        objekat: savedOffer.objekat,
         clientName: savedOffer.clientName,
         clientAddress: savedOffer.clientAddress,
         clientPhone: savedOffer.clientPhone,

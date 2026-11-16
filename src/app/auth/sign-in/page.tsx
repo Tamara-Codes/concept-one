@@ -1,6 +1,6 @@
 "use client";
 
-import { createAuthClient } from "@neondatabase/auth";
+import { createAuthClient } from "@neondatabase/auth/next";
 import { useEffect, useState } from "react";
 import {
   AuthView,
@@ -8,11 +8,7 @@ import {
   NeonAuthUIProvider,
 } from "@neondatabase/auth-ui";
 
-// Browser auth goes through our local API so Neon session cookies stay on the
-// application's origin.
-const authClient = createAuthClient(
-  `${process.env.NEXT_PUBLIC_APP_URL ?? "http://localhost:3100"}/api/auth`,
-);
+const authClient = createAuthClient();
 
 export default function SignInPage() {
   const [redirectTarget, setRedirectTarget] = useState("/ponuda");

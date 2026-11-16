@@ -24,6 +24,7 @@ export default async function SavedOffersPage() {
           offerNumber: offers.offerNumber,
           offerDate: offers.offerDate,
           clientName: offers.clientName,
+          objekat: offers.objekat,
           status: offers.status,
           updatedAt: offers.updatedAt,
         })
@@ -63,6 +64,7 @@ export default async function SavedOffersPage() {
                     <span className={styles.status}><i />{offer.status === "draft" ? "Skica" : offer.status}</span>
                     <h2>{offer.offerNumber}</h2>
                     <p>{offer.clientName || "Klijent nije upisan"}</p>
+                    {offer.objekat && <p>Objekat: {offer.objekat}</p>}
                   </div>
                   <div className={styles.offerMeta}>
                     <span>Datum ponude</span>

@@ -33,6 +33,7 @@ export async function POST(request: Request) {
         offerNumber: String(body.offerNumber),
         offerDate: isoDate(body.offerDate),
         validUntil: body.validUntil ? isoDate(body.validUntil) : null,
+        objekat: typeof body.objekat === "string" ? body.objekat.trim() : undefined,
         clientName: String(body.clientName ?? ""),
         clientAddress: String(body.clientAddress ?? ""),
         clientPhone: String(body.clientPhone ?? ""),

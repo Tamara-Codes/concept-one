@@ -1,0 +1,2 @@
+ALTER TABLE "offers"
+  ADD COLUMN IF NOT EXISTS "objekat" text DEFAULT '' NOT NULL;
