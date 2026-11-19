@@ -11,6 +11,7 @@ import {
   uniqueIndex,
   uuid,
 } from "drizzle-orm/pg-core";
+import type { TechnicalPresentation } from "@/lib/technical-presentations";
 
 export const allowedUsers = pgTable(
   "allowed_users",
@@ -49,6 +50,9 @@ export const offers = pgTable(
     offerNotes: jsonb("offer_notes").$type<string[]>().notNull().default([]),
     warrantyHeading: text("warranty_heading").notNull().default("Jamstvo"),
     warrantyParagraphs: jsonb("warranty_paragraphs").$type<string[]>().notNull().default([]),
+    certificateNotes: text("certificate_notes").notNull().default(""),
+    installationNotes: text("installation_notes").notNull().default(""),
+    technicalPresentations: jsonb("technical_presentations").$type<TechnicalPresentation[]>(),
     status: text("status").notNull().default("draft"),
     createdBy: text("created_by").notNull(),
     updatedBy: text("updated_by").notNull(),
@@ -59,6 +63,7 @@ export const offers = pgTable(
     uniqueIndex("offers_offer_number_unique").on(table.offerNumber),
     index("offers_status_idx").on(table.status),
     index("offers_updated_at_idx").on(table.updatedAt),
+    index("offers_technical_presentations_idx").using("gin", table.technicalPresentations.op("jsonb_path_ops")),
   ]
 );
 

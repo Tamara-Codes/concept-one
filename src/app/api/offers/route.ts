@@ -1,11 +1,13 @@
 import { NextResponse } from "next/server";
 import { eq } from "drizzle-orm";
+import type { BatchItem } from "drizzle-orm/batch";
 import { HeadObjectCommand } from "@aws-sdk/client-s3";
 import { getDb } from "@/lib/db";
 import { getAuth } from "@/lib/auth";
 import { getAllowedOfferUser } from "@/lib/offer-access";
 import { offerItems, offerTechnicalSheets, offers } from "@/lib/db/schema";
 import { getR2BucketName, getR2Client } from "@/lib/storage/r2";
+import type { TechnicalPresentation } from "@/lib/technical-presentations";
 
 function isoDate(value: unknown) {
   if (typeof value !== "string" || !value.trim()) return new Date().toISOString().slice(0, 10);
@@ -13,6 +15,15 @@ function isoDate(value: unknown) {
   if (cro) return `${cro[3]}-${cro[2].padStart(2, "0")}-${cro[1].padStart(2, "0")}`;
   return value;
 }
+
+function isTechnicalPresentation(value: unknown): value is TechnicalPresentation {
+  if (!value || typeof value !== "object") return false;
+  const page = value as Record<string, unknown>;
+  return typeof page.title === "string" && typeof page.description === "string"
+    && (page.imageKey === null || (typeof page.imageKey === "string" && page.imageKey.length > 0));
+}
+
+class UnknownOfferImageError extends Error {}
 
 export async function POST(request: Request) {
   const allowedUser = await getAllowedOfferUser();
@@ -22,10 +33,23 @@ export async function POST(request: Request) {
   const email = session?.user?.email?.trim().toLowerCase();
   if (!email) return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
 
-  const body = await request.json();
-  if (!body.offerNumber || !Array.isArray(body.items)) {
+  const body = await request.json().catch(() => null);
+  if (!body || typeof body !== "object" || !body.offerNumber || !Array.isArray(body.items)
+    || !body.items.every((item: unknown) => item !== null && typeof item === "object" && !Array.isArray(item))) {
     return NextResponse.json({ error: "Offer number and items are required" }, { status: 400 });
   }
+  const presentations: unknown = body.technicalPresentations;
+  if (presentations !== undefined && (!Array.isArray(presentations) || !presentations.every(isTechnicalPresentation))) {
+    return NextResponse.json({ error: "Neispravna tehnička prezentacija." }, { status: 400 });
+  }
+  const technicalPresentations: TechnicalPresentation[] | undefined = presentations?.map(
+    ({ title, description, imageKey }) => ({ title, description, imageKey }),
+  );
+  const updating = typeof body.offerId === "string" && body.offerId.length > 0;
+  if (updating && !/^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(body.offerId)) {
+    return NextResponse.json({ error: "Neispravan ID ponude." }, { status: 400 });
+  }
+  const offerId = updating ? String(body.offerId) : crypto.randomUUID();
 
   const db = getDb();
   try {
@@ -51,44 +75,61 @@ export async function POST(request: Request) {
         offerNotes: Array.isArray(body.offerNotes) ? body.offerNotes.map(String) : [],
         warrantyHeading: String(body.warrantyHeading ?? "Jamstvo"),
         warrantyParagraphs: Array.isArray(body.warrantyParagraphs) ? body.warrantyParagraphs.map(String) : [],
+        certificateNotes: typeof body.certificateNotes === "string" ? body.certificateNotes : undefined,
+        installationNotes: typeof body.installationNotes === "string" ? body.installationNotes : undefined,
+        technicalPresentations,
         updatedBy: email,
       };
     const existingImageKeys = new Set<string>();
-    if (typeof body.offerId === "string" && body.offerId) {
-      const savedItems = await db.select({ imageKey: offerItems.imageKey }).from(offerItems).where(eq(offerItems.offerId, body.offerId));
-      for (const item of savedItems) if (item.imageKey) existingImageKeys.add(item.imageKey);
+    if (updating) {
+      const [[savedOffer], savedItems] = await Promise.all([
+        db.select({ presentations: offers.technicalPresentations }).from(offers).where(eq(offers.id, offerId)).limit(1),
+        db.select({ imageKey: offerItems.imageKey }).from(offerItems).where(eq(offerItems.offerId, offerId)),
+      ]);
+      if (!savedOffer) return NextResponse.json({ error: "Offer not found" }, { status: 404 });
+      for (const { imageKey } of [...savedItems, ...(savedOffer.presentations ?? [])]) {
+        if (imageKey) existingImageKeys.add(imageKey);
+      }
     }
+
+    const validatedImages = new Map<string, string | undefined>();
+    async function checkImage(key: string) {
+      if (existingImageKeys.has(key)) return undefined;
+      if (validatedImages.has(key)) return validatedImages.get(key);
+      if (!/^offers\/images\/[0-9a-f-]{36}\.(?:png|jpg|webp|gif)$/.test(key)) throw new UnknownOfferImageError();
+      try {
+        const object = await getR2Client().send(new HeadObjectCommand({ Bucket: getR2BucketName(), Key: key }));
+        validatedImages.set(key, object.ContentType);
+        return object.ContentType;
+      } catch {
+        throw new UnknownOfferImageError();
+      }
+    }
+
     const preparedItems: (Record<string, unknown> & { imageKey: string | null; imageContentType: string | null })[] = [];
     for (const item of body.items as Record<string, unknown>[]) {
-      let imageKey = typeof item.imageKey === "string" ? item.imageKey : null;
-      let imageContentType = typeof item.imageContentType === "string" ? item.imageContentType : null;
-      if (imageKey && !existingImageKeys.has(imageKey)) {
-        if (!/^offers\/images\/[0-9a-f-]{36}\.(?:png|jpg|webp|gif)$/.test(imageKey)) {
-          return NextResponse.json({ error: "Unknown offer image" }, { status: 400 });
-        }
-        try {
-          const object = await getR2Client().send(new HeadObjectCommand({ Bucket: getR2BucketName(), Key: imageKey }));
-          imageContentType = object.ContentType || imageContentType;
-        } catch {
-          return NextResponse.json({ error: "Unknown offer image" }, { status: 400 });
-        }
-      }
+      const imageKey = typeof item.imageKey === "string" ? item.imageKey : null;
+      const storedType = imageKey ? await checkImage(imageKey) : undefined;
+      const imageContentType = storedType || (typeof item.imageContentType === "string" ? item.imageContentType : null);
       preparedItems.push({ ...item, imageKey, imageContentType });
     }
-    let offerId: string;
-    if (typeof body.offerId === "string" && body.offerId) {
-      const [updated] = await db.update(offers).set({ ...offerValues, updatedBy: email, updatedAt: new Date() }).where(eq(offers.id, body.offerId)).returning({ id: offers.id });
-      if (!updated) return NextResponse.json({ error: "Offer not found" }, { status: 404 });
-      offerId = updated.id;
-      await db.delete(offerItems).where(eq(offerItems.offerId, offerId));
-      await db.delete(offerTechnicalSheets).where(eq(offerTechnicalSheets.offerId, offerId));
-    } else {
-      const [created] = await db.insert(offers).values({ ...offerValues, createdBy: email }).returning({ id: offers.id });
-      offerId = created.id;
+    for (const { imageKey } of technicalPresentations ?? []) {
+      if (imageKey) await checkImage(imageKey);
+    }
+
+    const saveOffer = updating
+      ? db.update(offers).set({ ...offerValues, updatedAt: new Date() }).where(eq(offers.id, offerId)).returning({ id: offers.id })
+      : db.insert(offers).values({ ...offerValues, id: offerId, createdBy: email }).returning({ id: offers.id });
+    const queries: [typeof saveOffer, ...BatchItem<"pg">[]] = [saveOffer];
+    if (updating) {
+      queries.push(
+        db.delete(offerItems).where(eq(offerItems.offerId, offerId)),
+        db.delete(offerTechnicalSheets).where(eq(offerTechnicalSheets.offerId, offerId)),
+      );
     }
 
     if (preparedItems.length) {
-      await db.insert(offerItems).values(
+      queries.push(db.insert(offerItems).values(
         preparedItems.map((item, index) => ({
           offerId,
           position: Number(item.position ?? index),
@@ -102,23 +143,29 @@ export async function POST(request: Request) {
           dimensions: String(item.dimensions ?? ""),
           isSurcharge: Boolean(item.isSurcharge),
         }))
-      );
+      ));
     }
 
     const sheetIds = Array.isArray(body.technicalSheetIds) ? body.technicalSheetIds.filter((id: unknown): id is string => typeof id === "string") : [];
     if (sheetIds.length) {
-      await db.insert(offerTechnicalSheets).values(
+      queries.push(db.insert(offerTechnicalSheets).values(
         sheetIds.map((technicalSheetId: string, position: number) => ({ offerId, technicalSheetId, position }))
-      );
+      ));
     }
 
-    return NextResponse.json({ id: offerId, imageKeys: preparedItems.map((item) => item.imageKey) }, { status: body.offerId ? 200 : 201 });
+    const [[saved]] = await db.batch(queries);
+    if (!saved) return NextResponse.json({ error: "Offer not found" }, { status: 404 });
+    return NextResponse.json({ id: offerId, imageKeys: preparedItems.map((item) => item.imageKey) }, { status: updating ? 200 : 201 });
   } catch (error) {
-    console.error("Failed to save offer", error);
-    const dbError = error as { cause?: { code?: string } };
-    if (dbError.cause?.code === "23505") {
+    if (error instanceof UnknownOfferImageError) {
+      return NextResponse.json({ error: "Slika ponude nije pronađena." }, { status: 400 });
+    }
+    const dbError = error as { code?: string; cause?: { code?: string } };
+    const code = dbError.code ?? dbError.cause?.code;
+    if (code === "23505") {
       return NextResponse.json({ error: "An offer with this number already exists" }, { status: 409 });
     }
+    console.error("Failed to save offer", { code, name: error instanceof Error ? error.name : undefined });
     return NextResponse.json({ error: "Offer could not be saved" }, { status: 500 });
   }
 }

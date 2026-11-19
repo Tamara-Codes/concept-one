@@ -22,7 +22,7 @@ export default async function NewOfferEditorPage({
     : [];
   const savedSheets = savedOffer
     ? await db
-        .select({ id: technicalSheets.id, name: technicalSheets.name, description: technicalSheets.description, storageKey: technicalSheets.storageKey, position: offerTechnicalSheets.position })
+        .select({ id: technicalSheets.id, name: technicalSheets.name, description: technicalSheets.description })
         .from(offerTechnicalSheets)
         .innerJoin(technicalSheets, eq(technicalSheets.id, offerTechnicalSheets.technicalSheetId))
         .where(eq(offerTechnicalSheets.offerId, savedOffer.id))
@@ -31,7 +31,7 @@ export default async function NewOfferEditorPage({
   const selectedNames = params.technicalSheets?.split(",").filter(Boolean) ?? [];
   const rows = selectedNames.length && !savedOffer
     ? await db
-        .select({ id: technicalSheets.id, name: technicalSheets.name, description: technicalSheets.description, storageKey: technicalSheets.storageKey })
+        .select({ id: technicalSheets.id, name: technicalSheets.name, description: technicalSheets.description })
         .from(technicalSheets)
         .where(inArray(technicalSheets.name, selectedNames))
     : [];
@@ -63,9 +63,24 @@ export default async function NewOfferEditorPage({
         offerNotes: savedOffer.offerNotes,
         warrantyHeading: savedOffer.warrantyHeading,
         warrantyParagraphs: savedOffer.warrantyParagraphs,
+        certificateNotes: savedOffer.certificateNotes,
+        installationNotes: savedOffer.installationNotes,
         items: savedItems,
       }
     : undefined;
 
-  return <PonudaForm technicalSheets={savedOffer ? savedSheets : selectedSheets} initialOffer={initialOffer} />;
+  const sheets = savedOffer ? savedSheets : selectedSheets;
+  const presentations = savedOffer?.technicalPresentations ?? sheets.map((sheet) => ({
+    title: sheet.name,
+    description: sheet.description,
+    imageKey: null,
+  }));
+
+  return (
+    <PonudaForm
+      initialOffer={initialOffer}
+      initialPresentations={presentations}
+      technicalSheetIds={sheets.map(({ id }) => id)}
+    />
+  );
 }

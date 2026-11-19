@@ -3,6 +3,9 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import Image from "next/image";
 import { site } from "@/data/site";
+import { offerImageUrl, uploadOfferImage } from "@/lib/offer-image-client";
+import type { TechnicalPresentation } from "@/lib/technical-presentations";
+import TechnicalPresentations, { type PresentationDraft } from "./TechnicalPresentations";
 
 type Item = {
   id: string;
@@ -47,13 +50,6 @@ const offerProjects = [
   { image: "garage-door.webp", title: "Moderna garažna vrata" },
 ];
 
-type TechnicalSheet = {
-  id: string;
-  name: string;
-  description: string;
-  storageKey: string;
-};
-
 type InitialOffer = {
   id: string;
   offerNumber: string;
@@ -77,6 +73,8 @@ type InitialOffer = {
   offerNotes: string[];
   warrantyHeading: string;
   warrantyParagraphs: string[];
+  certificateNotes: string;
+  installationNotes: string;
   items: Array<{
     description: string;
     imageKey: string | null;
@@ -190,7 +188,74 @@ function OfferPageHeading({ title, subtitle }: { title: string; subtitle?: strin
   );
 }
 
-export default function PonudaForm({ technicalSheets = [], initialOffer }: { technicalSheets?: TechnicalSheet[]; initialOffer?: InitialOffer }) {
+function fitTermsText(field: HTMLTextAreaElement | null) {
+  if (!field) return;
+  field.style.height = "auto";
+  field.style.height = `${field.scrollHeight}px`;
+}
+
+function replaceTermsParagraph(paragraphs: string[], index: number, value: string) {
+  const updated = [...paragraphs];
+  updated[index] = value;
+  return updated;
+}
+
+function EditableOfferTerms({ title, heading = title, onHeadingChange, paragraphs, onChange, onRemove, list }: {
+  title: string;
+  heading?: string;
+  onHeadingChange?: (heading: string) => void;
+  paragraphs: string[];
+  onChange: (index: number, value: string) => void;
+  onRemove: () => void;
+  list?: boolean;
+}) {
+  const Paragraph = list ? "li" : "div";
+  const Body = list ? "ul" : "div";
+  const values = paragraphs.length ? paragraphs : [""];
+  return (
+    <section className={values.some((value) => value.trim()) ? "offer-terms-section" : "offer-terms-section no-print"}>
+      <div className="offer-terms-section-heading">
+        {onHeadingChange ? (
+          <>
+            <input className="offer-terms-heading-input no-print" aria-label={`Naslov odjeljka: ${title}`}
+              value={heading} onChange={(event) => onHeadingChange(event.target.value)} />
+            {heading.trim() && <h3 className="offer-terms-print-text">{heading}</h3>}
+          </>
+        ) : <h3>{heading}</h3>}
+        <button type="button" className="offer-terms-action no-print" aria-label={`Ukloni odjeljak: ${title}`} onClick={onRemove}>
+          Ukloni
+        </button>
+      </div>
+      <Body className="offer-terms-body">
+        {values.map((value, index) => (
+          <Paragraph key={index} className={value.trim() ? undefined : "no-print"}>
+            <textarea
+              ref={fitTermsText}
+              aria-label={values.length === 1 ? title : `${title} ${index + 1}`}
+              className="offer-terms-textarea no-print"
+              value={value}
+              onChange={(event) => {
+                fitTermsText(event.currentTarget);
+                onChange(index, event.currentTarget.value);
+              }}
+              placeholder="Upišite tekst…"
+              rows={1}
+            />
+            <span className="offer-terms-print-text">{value}</span>
+          </Paragraph>
+        ))}
+      </Body>
+    </section>
+  );
+}
+
+export default function PonudaForm({
+  initialOffer, initialPresentations = [], technicalSheetIds = [],
+}: {
+  initialOffer?: InitialOffer;
+  initialPresentations?: TechnicalPresentation[];
+  technicalSheetIds?: string[];
+}) {
   const [saveState, setSaveState] = useState<"idle" | "saving" | "saved" | "exists" | "error">("idle");
   const [saveError, setSaveError] = useState("");
   const [savedOfferId, setSavedOfferId] = useState<string | null>(initialOffer?.id ?? null);
@@ -210,7 +275,11 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
   const [coContact, setCoContact] = useState(initialOffer?.coContact ?? `${site.contacts[0].name} · ${site.contacts[0].phoneDisplay}`);
   const [coEmail, setCoEmail] = useState(initialOffer?.coEmail ?? site.contacts[0].email);
 
-  const [items, setItems] = useState<Item[]>(initialOffer?.items?.length ? initialOffer.items.map((item) => ({ ...newItem(), id: crypto.randomUUID(), desc: item.description, imageKey: item.imageKey ?? "", imageContentType: item.imageContentType ?? "", imageSrc: item.imageKey ? `/api/offers/image?key=${encodeURIComponent(item.imageKey)}` : "", imageName: item.imageName ?? "", qty: Number(item.quantity), price: Number(item.unitPrice), discountPct: Number(item.discountPct), dimensions: item.dimensions, isSurcharge: item.isSurcharge })) : [newItem()]);
+  const [items, setItems] = useState<Item[]>(initialOffer?.items?.length ? initialOffer.items.map((item) => ({ ...newItem(), id: crypto.randomUUID(), desc: item.description, imageKey: item.imageKey ?? "", imageContentType: item.imageContentType ?? "", imageSrc: item.imageKey ? offerImageUrl(item.imageKey) : "", imageName: item.imageName ?? "", qty: Number(item.quantity), price: Number(item.unitPrice), discountPct: Number(item.discountPct), dimensions: item.dimensions, isSurcharge: item.isSurcharge })) : [newItem()]);
+  const [presentations, setPresentations] = useState<PresentationDraft[]>(() => initialPresentations.map((page, index) => ({
+    ...page, id: `presentation-${index}`, imageData: "",
+  })));
+  const [presentationBusy, setPresentationBusy] = useState(false);
   const [discountPct, setDiscountPct] = useState(Number(initialOffer?.discountPct ?? 0));
   const [showDiscount, setShowDiscount] = useState(initialOffer?.showDiscount ?? false);
   const [vatRate, setVatRate] = useState(Number(initialOffer?.vatRate ?? 25));
@@ -218,7 +287,9 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
   const [deliveryTerms, setDeliveryTerms] = useState(initialOffer?.deliveryTerms ?? "30–45 radnih dana od potvrde narudžbe");
   const [termsPageTitle, setTermsPageTitle] = useState(initialOffer?.termsPageTitle ?? "Napomena i jamstvo");
   const [termsPageSubtitle, setTermsPageSubtitle] = useState(initialOffer?.termsPageSubtitle ?? "Uvjeti ponude");
-  const [notesHeading, setNotesHeading] = useState(initialOffer?.notesHeading ?? "Napomena");
+  const hasNotes = Boolean(initialOffer && (initialOffer.notesHeading || initialOffer.offerNotes.length));
+  const hasWarranty = Boolean(initialOffer && (initialOffer.warrantyHeading || initialOffer.warrantyParagraphs.length));
+  const [notesHeading, setNotesHeading] = useState(initialOffer && hasNotes ? initialOffer.notesHeading : "Napomena");
   const [offerNotes, setOfferNotes] = useState(initialOffer?.offerNotes ?? [
     "Montaža nije uključena u cijenu.",
     "PDV nije uključen u cijenu.",
@@ -226,11 +297,19 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
     "Dizalice i ostala mehanizacija na gradilištu nisu uključene u cijenu.",
     "Svi usmeni dogovori, izmjene ili dopune koje nisu navedene u pisanoj ponudi smatraju se nevažećima i nisu obvezujući za Concept One.",
   ]);
-  const [warrantyHeading, setWarrantyHeading] = useState(initialOffer?.warrantyHeading ?? "Jamstvo");
+  const [warrantyHeading, setWarrantyHeading] = useState(initialOffer && hasWarranty ? initialOffer.warrantyHeading : "Jamstvo");
   const [warrantyParagraphs, setWarrantyParagraphs] = useState(initialOffer?.warrantyParagraphs ?? [
     "Prodavatelj daje jamstvo u trajanju od 5 godina na profile i postojanost boje, okove i mehanizme te termoizolacijske staklene jedinice. Također, prodavatelj daje jamstvo u trajanju od 2 godine na dodatnu opremu (rolete, komarnike i slično), osim u slučajevima mehaničkih oštećenja, nepravilne uporabe, neadekvatnog održavanja ili nepridržavanja uputa za uporabu.",
     "Jamstvo ne obuhvaća oštećenja nastala tijekom prijevoza, rukovanja na lokaciji ili montaže, kao ni oštećenja koja su posljedica nepravilnog skladištenja, manipulacije ili ugradnje od strane trećih osoba.",
   ]);
+  const [certificateNotes, setCertificateNotes] = useState(initialOffer?.certificateNotes ?? "");
+  const [installationNotes, setInstallationNotes] = useState(initialOffer?.installationNotes ?? "");
+  const [enabledTerms, setEnabledTerms] = useState({
+    notes: !initialOffer || hasNotes,
+    warranty: !initialOffer || hasWarranty,
+    certificates: Boolean(certificateNotes.trim()),
+    installation: Boolean(installationNotes.trim()),
+  });
 
   useEffect(() => {
     if (!initialized.current) {
@@ -243,7 +322,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
     }
     editVersion.current += 1;
     setSaveState((state) => state === "saving" ? "saving" : "idle");
-  }, [offerNumber, offerDate, validUntil, objekat, clientName, clientAddress, clientPhone, clientEmail, coContact, coEmail, items, discountPct, showDiscount, vatRate, paymentTerms, deliveryTerms, termsPageTitle, termsPageSubtitle, notesHeading, offerNotes, warrantyHeading, warrantyParagraphs]);
+  }, [offerNumber, offerDate, validUntil, objekat, clientName, clientAddress, clientPhone, clientEmail, coContact, coEmail, items, presentations, discountPct, showDiscount, vatRate, paymentTerms, deliveryTerms, termsPageTitle, termsPageSubtitle, notesHeading, offerNotes, warrantyHeading, warrantyParagraphs, certificateNotes, installationNotes, enabledTerms]);
 
   function updateItem(id: string, patch: Partial<Item>) {
     setItems((prev) => prev.map((it) => (it.id === id ? { ...it, ...patch } : it)));
@@ -325,18 +404,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         let imageKey = item.imageKey || null;
         if (!imageKey && item.imageSrc.startsWith("data:")) {
           const blob = await (await fetch(item.imageSrc)).blob();
-          if (blob.size > 4 * 1024 * 1024) throw new Error("Slika je prevelika (najviše 4 MB).");
-          const upload = await fetch("/api/offers/image", {
-            method: "POST",
-            headers: { "Content-Type": item.imageContentType },
-            body: blob,
-          });
-          if (!upload.ok) {
-            const details = await upload.json().catch(() => ({}));
-            throw new Error(details.error || "Slika se nije mogla spremiti.");
-          }
-          const uploaded: { key: string } = await upload.json();
-          imageKey = uploaded.key;
+          imageKey = await uploadOfferImage(blob, item.imageContentType);
         }
         itemsForSave.push({
           position: itemsForSave.length,
@@ -350,6 +418,14 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           dimensions: item.dimensions,
           isSurcharge: item.isSurcharge,
         });
+      }
+      const technicalPresentations: TechnicalPresentation[] = [];
+      for (const page of presentations) {
+        let imageKey = page.imageKey;
+        if (!imageKey && page.imageData) {
+          imageKey = await uploadOfferImage(await (await fetch(page.imageData)).blob());
+        }
+        technicalPresentations.push({ title: page.title, description: page.description, imageKey });
       }
       const response = await fetch("/api/offers", {
         method: "POST",
@@ -373,11 +449,14 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           deliveryTerms,
           termsPageTitle,
           termsPageSubtitle,
-          notesHeading,
-          offerNotes,
-          warrantyHeading,
-          warrantyParagraphs,
-          technicalSheetIds: technicalSheets.map((sheet) => sheet.id),
+          notesHeading: enabledTerms.notes ? notesHeading : "",
+          offerNotes: enabledTerms.notes ? offerNotes : [],
+          warrantyHeading: enabledTerms.warranty ? warrantyHeading : "",
+          warrantyParagraphs: enabledTerms.warranty ? warrantyParagraphs : [],
+          certificateNotes: enabledTerms.certificates ? certificateNotes : "",
+          installationNotes: enabledTerms.installation ? installationNotes : "",
+          technicalSheetIds,
+          technicalPresentations,
           items: itemsForSave,
         }),
       });
@@ -385,7 +464,10 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         setSaveState("exists");
         return;
       }
-      if (!response.ok) throw new Error("Spremanje nije uspjelo");
+      if (!response.ok) {
+        const details = await response.json().catch(() => ({}));
+        throw new Error(details.error || "Spremanje nije uspjelo");
+      }
       const result: { id: string; imageKeys: (string | null)[] } = await response.json();
       setSavedOfferId(result.id);
       if (!savedOfferId) {
@@ -394,6 +476,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
       if (editVersion.current === versionBeingSaved) {
         skipNextEditEffect.current = true;
         setItems((current) => current.map((item, index) => ({ ...item, imageKey: result.imageKeys[index] ?? "" })));
+        setPresentations((current) => current.map((page, index) => ({ ...page, imageKey: technicalPresentations[index].imageKey })));
         setSaveState("saved");
       } else {
         setSaveState("idle");
@@ -404,16 +487,42 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
     }
   }
 
+  const termsSections = {
+    notes: {
+      title: "Napomena", addLabel: "Dodaj napomenu", heading: notesHeading,
+      onHeadingChange: setNotesHeading, paragraphs: offerNotes, list: true,
+      onChange: (index: number, value: string) => setOfferNotes((current) => replaceTermsParagraph(current, index, value)),
+    },
+    warranty: {
+      title: "Jamstvo", addLabel: "Dodaj jamstvo", heading: warrantyHeading,
+      onHeadingChange: setWarrantyHeading, paragraphs: warrantyParagraphs,
+      onChange: (index: number, value: string) => setWarrantyParagraphs((current) => replaceTermsParagraph(current, index, value)),
+    },
+    certificates: {
+      title: "Atesti", addLabel: "Dodaj ateste", paragraphs: [certificateNotes],
+      onChange: (_index: number, value: string) => setCertificateNotes(value),
+    },
+    installation: {
+      title: "Ugradnja", addLabel: "Dodaj ugradnju", paragraphs: [installationNotes],
+      onChange: (_index: number, value: string) => setInstallationNotes(value),
+    },
+  };
+  const termsOrder = ["notes", "warranty", "certificates", "installation"] as const;
+  const hasPrintableTerms = termsOrder.some((key) => enabledTerms[key] && termsSections[key].paragraphs.some((value) => value.trim()));
+
   return (
     <div className="min-h-screen bg-co-warm-dark py-10 print:bg-white print:py-0">
       <div className="no-print max-w-[210mm] mx-auto px-4 mb-4 flex items-center justify-between">
-        <a href={savedOfferId ? "/ponuda/saved" : "/ponuda"} className="text-sm text-co-charcoal/50 hover:text-co-accent-dark transition-colors">
-          &larr; Natrag na ponude
-        </a>
+        <div className="flex flex-wrap items-center gap-x-4 gap-y-2 text-sm">
+          <a href={savedOfferId ? "/ponuda/saved" : "/ponuda"} className="text-co-charcoal/50 hover:text-co-accent-dark transition-colors">
+            &larr; Natrag na ponude
+          </a>
+          <a href="#tehnicke-prezentacije" className="font-semibold text-co-accent-dark hover:underline">Tehničke prezentacije</a>
+        </div>
         <div className="flex items-center gap-3">
           <button
             onClick={saveOffer}
-            disabled={saveState === "saving" || saveState === "saved"}
+            disabled={presentationBusy || saveState === "saving" || saveState === "saved"}
             className="text-sm font-semibold px-5 py-2 rounded-md border border-co-charcoal/20 bg-white text-co-charcoal hover:bg-co-warm transition-colors disabled:cursor-default disabled:opacity-60"
           >
             {saveState === "saving" ? "Spremam…" : saveState === "saved" ? "Spremljeno" : saveState === "exists" ? "Već spremljeno" : "Spremi ponudu"}
@@ -460,7 +569,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
                 <input value={offerDate} onChange={(e) => setOfferDate(e.target.value)} />
               </label>
               <label className={objekat.trim() ? undefined : "no-print"}>
-                <span>OBJEKAT</span>
+                <span>OBJEKT</span>
                 <input
                   className="no-print"
                   value={objekat}
@@ -889,7 +998,7 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         </div>
         </section>
 
-        <section className="offer-page offer-terms-page">
+        <section className={`offer-page offer-terms-page${hasPrintableTerms ? "" : " no-print"}`}>
           <header className="offer-static-heading offer-editable-static-heading">
             <div className="offer-static-brand">CONCEPT ONE</div>
             <input
@@ -907,66 +1016,20 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
             <div className="offer-gold-rule" />
           </header>
           <div className="offer-terms-content">
-            <input
-              value={notesHeading}
-              onChange={(event) => setNotesHeading(event.target.value)}
-              aria-label="Naslov napomene"
-              className="offer-terms-heading-input"
-            />
-            <ul>
-              {offerNotes.map((note, index) => (
-                <li key={index}>
-                  <textarea
-                    ref={(element) => {
-                      if (element) {
-                        element.style.height = "auto";
-                        element.style.height = `${element.scrollHeight}px`;
-                      }
-                    }}
-                    value={note}
-                    onChange={(event) => {
-                      setOfferNotes((previous) =>
-                        previous.map((item, itemIndex) => (itemIndex === index ? event.target.value : item))
-                      );
-                      event.target.style.height = "auto";
-                      event.target.style.height = `${event.target.scrollHeight}px`;
-                    }}
-                    aria-label={`Napomena ${index + 1}`}
-                    rows={1}
-                    className="offer-terms-textarea"
-                  />
-                </li>
-              ))}
-            </ul>
-
-            <input
-              value={warrantyHeading}
-              onChange={(event) => setWarrantyHeading(event.target.value)}
-              aria-label="Naslov jamstva"
-              className="offer-terms-heading-input offer-terms-heading-warranty"
-            />
-            {warrantyParagraphs.map((paragraph, index) => (
-              <textarea
-                key={index}
-                ref={(element) => {
-                  if (element) {
-                    element.style.height = "auto";
-                    element.style.height = `${element.scrollHeight}px`;
-                  }
-                }}
-                value={paragraph}
-                onChange={(event) => {
-                  setWarrantyParagraphs((previous) =>
-                    previous.map((item, itemIndex) => (itemIndex === index ? event.target.value : item))
-                  );
-                  event.target.style.height = "auto";
-                  event.target.style.height = `${event.target.scrollHeight}px`;
-                }}
-                aria-label={`Jamstvo ${index + 1}`}
-                rows={1}
-                className="offer-terms-textarea offer-terms-paragraph"
-              />
+            {termsOrder.filter((key) => enabledTerms[key]).map((key) => (
+              <EditableOfferTerms key={key} {...termsSections[key]}
+                onRemove={() => setEnabledTerms((current) => ({ ...current, [key]: false }))} />
             ))}
+            {termsOrder.some((key) => !enabledTerms[key]) && (
+              <div className="offer-terms-add no-print">
+                {termsOrder.filter((key) => !enabledTerms[key]).map((key) => (
+                  <button key={key} type="button" className="offer-terms-action"
+                    onClick={() => setEnabledTerms((current) => ({ ...current, [key]: true }))}>
+                    + {termsSections[key].addLabel}
+                  </button>
+                ))}
+              </div>
+            )}
           </div>
           <OfferPageFooter />
         </section>
@@ -1015,26 +1078,15 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           <OfferPageFooter />
         </section>
 
-        {technicalSheets.map((sheet) => (
-          <section className="offer-page offer-technical-page" key={sheet.name}>
-            <OfferPageHeading title={`Tehnička prezentacija: ${sheet.name}`} subtitle="Proizvod uključen u ponudu" />
-            <div className="offer-technical-copy">
-              <h3>{sheet.name}</h3>
-              <p>{sheet.description}</p>
-              <p>Ovo je testni tehnički list. PDF i slika proizvoda mogu se dodati u R2 spremnik prije produkcije.</p>
-            </div>
-            <div className="offer-technical-image">
-              <Image
-                src="/images/offer/technical.png"
-                alt={`Testni prikaz za ${sheet.name}`}
-                fill
-                sizes="178mm"
-                className="object-contain"
-              />
-            </div>
-            <OfferPageFooter />
-          </section>
-        ))}
+        <TechnicalPresentations
+          pages={presentations}
+          setPages={setPresentations}
+          busy={presentationBusy}
+          setBusy={setPresentationBusy}
+          saving={saveState === "saving"}
+          heading={<OfferPageHeading title="Tehnička prezentacija" />}
+          footer={<OfferPageFooter />}
+        />
       </div>
 
       <style>{`
@@ -1268,7 +1320,6 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
         .offer-terms-content {
           padding: 11mm 15mm 30mm;
         }
-        .offer-terms-content h3,
         .offer-technical-copy h3 {
           margin: 0 0 5mm;
           color: #8f7044;
@@ -1277,26 +1328,58 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
-        .offer-terms-content h3:nth-of-type(2) {
-          margin-top: 18mm;
+        .offer-terms-section + .offer-terms-section {
+          margin-top: 9mm;
         }
+        .offer-terms-section-heading {
+          display: flex;
+          align-items: center;
+          justify-content: space-between;
+          gap: 4mm;
+          margin-bottom: 3mm;
+          break-after: avoid;
+        }
+        .offer-terms-section-heading h3,
         .offer-terms-heading-input {
-          margin: 0 0 5mm;
+          margin: 0;
           color: #8f7044;
           font-size: 11pt;
           font-weight: 800;
           letter-spacing: 0.08em;
           text-transform: uppercase;
         }
-        .offer-terms-heading-warranty {
-          margin-top: 18mm;
+        .offer-terms-heading-input {
+          flex: 1;
+          min-width: 0;
         }
-        .offer-terms-content ul {
+        .offer-terms-action {
+          flex-shrink: 0;
+          border: 0;
+          background: transparent;
+          padding: 1mm 0;
+          color: #766044;
+          font-size: 9pt;
+          text-decoration: underline;
+          text-underline-offset: 0.2em;
+        }
+        .offer-terms-add {
+          display: flex;
+          flex-wrap: wrap;
+          gap: 4mm;
+          margin-top: 7mm;
+        }
+        .offer-terms-body {
           margin: 0;
-          padding-left: 6mm;
           color: #54595d;
-          font-size: 12pt;
-          line-height: 1.7;
+          font-size: 11pt;
+          line-height: 1.6;
+        }
+        ul.offer-terms-body {
+          padding-left: 6mm;
+          list-style: disc;
+        }
+        .offer-terms-body > * + * {
+          margin-top: 2mm;
         }
         .offer-terms-textarea {
           resize: none;
@@ -1306,24 +1389,22 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           font: inherit;
           line-height: inherit;
         }
-        .offer-terms-paragraph {
-          margin: 0 0 7mm;
-          color: #54595d;
-          font-size: 11pt;
-          line-height: 1.6;
-        }
-        .offer-terms-content p,
         .offer-technical-copy p {
           margin: 0 0 7mm;
           color: #54595d;
           font-size: 11pt;
           line-height: 1.6;
         }
+        .offer-terms-print-text {
+          display: none;
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+        }
         .offer-brand-grid {
           display: grid;
           grid-template-columns: repeat(3, minmax(0, 1fr));
           grid-auto-rows: 29mm;
-          gap: 8mm 9mm;
+          gap: 18mm 9mm;
           margin: 14mm 15mm 0;
           padding: 0;
           list-style: none;
@@ -1356,14 +1437,28 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           font-weight: 600;
           line-height: 1.3;
         }
+        .offer-technical-page {
+          padding-bottom: 28mm;
+        }
         .offer-technical-copy {
           padding: 10mm 15mm 0;
         }
+        .offer-technical-print-copy {
+          display: none;
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+        }
         .offer-technical-image {
-          position: relative;
-          width: calc(100% - 30mm);
-          height: 92mm;
-          margin: 7mm 15mm 28mm;
+          margin: 7mm 15mm 0;
+          break-inside: avoid;
+        }
+        .offer-technical-image img {
+          display: block;
+          width: auto;
+          height: auto;
+          max-width: 100%;
+          max-height: 120mm;
+          margin: 0 auto;
         }
         .sheet {
           --bg: #ffffff;
@@ -1764,6 +1859,10 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
           .offer-cover-field-value {
             display: block;
           }
+          .offer-technical-print-copy,
+          .offer-terms-print-text {
+            display: block;
+          }
           .field {
             border-bottom: none !important;
           }
@@ -1782,11 +1881,13 @@ export default function PonudaForm({ technicalSheets = [], initialOffer }: { tec
             break-after: page;
             page-break-after: always;
           }
-          .offer-page:last-child {
+          .offer-page:last-of-type {
             break-after: auto;
             page-break-after: auto;
           }
-          .offer-form-page {
+          .offer-form-page,
+          .offer-terms-page,
+          .offer-technical-page {
             height: auto;
             overflow: visible;
           }

@@ -3,6 +3,7 @@ import { eq } from "drizzle-orm";
 import { getDb } from "@/lib/db";
 import { offerItems, offers } from "@/lib/db/schema";
 import { getAllowedOfferUser } from "@/lib/offer-access";
+import { isOfferImageReferenced } from "@/lib/offer-image-references";
 import { getR2BucketName, getR2Client } from "@/lib/storage/r2";
 
 export async function DELETE(
@@ -24,20 +25,18 @@ export async function DELETE(
       .select({ imageKey: offerItems.imageKey })
       .from(offerItems)
       .where(eq(offerItems.offerId, id));
-    const [deleted] = await db.delete(offers).where(eq(offers.id, id)).returning({ id: offers.id });
+    const [deleted] = await db.delete(offers).where(eq(offers.id, id)).returning({
+      technicalPresentations: offers.technicalPresentations,
+    });
     if (!deleted) return Response.json({ error: "Ponuda nije pronađena." }, { status: 404 });
 
     // The database cascade removes items and sheet links. Remove image objects
     // only when no other offer still references them.
-    const imageKeys = [...new Set(items.map((item) => item.imageKey).filter((key): key is string => Boolean(key)))];
+    const imageKeys = new Set([...items, ...(deleted.technicalPresentations ?? [])].map(({ imageKey }) => imageKey));
     for (const key of imageKeys) {
-      const [otherReference] = await db
-        .select({ id: offerItems.id })
-        .from(offerItems)
-        .where(eq(offerItems.imageKey, key))
-        .limit(1);
-      if (otherReference) continue;
+      if (!key) continue;
       try {
+        if (await isOfferImageReferenced(key)) continue;
         await getR2Client().send(new DeleteObjectCommand({ Bucket: getR2BucketName(), Key: key }));
       } catch (error) {
         // The offer is gone even if R2 is temporarily unavailable. Its image

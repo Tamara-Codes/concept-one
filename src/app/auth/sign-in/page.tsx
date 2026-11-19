@@ -15,7 +15,9 @@ export default function SignInPage() {
 
   useEffect(() => {
     const next = new URLSearchParams(window.location.search).get("next");
-    if (next?.startsWith("/")) setRedirectTarget(next);
+    if (next?.startsWith("/") && !next.startsWith("//") && !next.includes("\\")) {
+      setRedirectTarget(next);
+    }
   }, []);
 
   return (

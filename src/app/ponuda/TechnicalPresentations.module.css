@@ -1,0 +1,152 @@
+.toolbar {
+  padding: 20px;
+  border: 1px solid #dedfdb;
+  border-radius: 12px;
+  background: #fff;
+  color: #202225;
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.actions,
+.editorActions {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 12px;
+}
+
+.button,
+.primaryButton {
+  appearance: none;
+  border: 1px solid #d8dad5;
+  border-radius: 8px;
+  padding: 12px 18px;
+  background: #fff;
+  color: #202225;
+  font: 600 14px/1.4 "Manrope", system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.primaryButton {
+  border-color: #202225;
+  background: #202225;
+  color: #fff;
+}
+
+.button:hover { background: #f3f4f2; }
+.primaryButton:hover { background: #3b3e40; }
+
+.archive {
+  display: flex;
+  align-items: flex-end;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 20px;
+}
+
+.editor {
+  display: grid;
+  gap: 24px;
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  color: #202225;
+  font-family: "Manrope", system-ui, sans-serif;
+}
+
+.field,
+.archiveField {
+  display: grid;
+  gap: 8px;
+  min-width: 0;
+  color: #54595d;
+  font-size: 13px;
+  font-weight: 600;
+  line-height: 1.5;
+}
+
+.archiveField { flex: 1 1 280px; }
+
+.input {
+  box-sizing: border-box;
+  display: block;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  border: 1px solid #d8dad5;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fff;
+  color: #202225;
+  font: 400 15px/1.65 "Manrope", system-ui, sans-serif;
+}
+
+.input::placeholder { color: #90958f; }
+.input:focus-visible { outline: 2px solid #b5945f; outline-offset: 2px; }
+
+.description {
+  min-height: 144px;
+  overflow: hidden;
+  resize: none;
+}
+
+.upload {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 112px;
+  box-sizing: border-box;
+  border: 1px dashed #b5945f;
+  border-radius: 10px;
+  padding: 20px;
+  background: #f8f7f3;
+  text-align: center;
+}
+
+.upload:hover { background: #f2eee5; }
+.upload:focus-within { outline: 2px solid #b5945f; outline-offset: 2px; }
+.uploadTitle { color: #806338; font-size: 14px; font-weight: 600; }
+.uploadHint { color: #727870; font-size: 12px; font-weight: 400; }
+
+.fileInput {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
+}
+
+.editorActions { justify-content: flex-end; }
+
+.textButton,
+.removeButton {
+  border: 0;
+  background: transparent;
+  padding: 6px 0;
+  color: #727870;
+  font: 500 12px/1.5 "Manrope", system-ui, sans-serif;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  cursor: pointer;
+}
+
+.removeButton { color: #9b5146; }
+.message { margin: 0; color: #54595d; font-size: 14px; }
+.error { flex-basis: 100%; margin: 0; color: #a03428; font-size: 13px; }
+
+.button:disabled,
+.primaryButton:disabled,
+.editor:disabled {
+  opacity: 0.55;
+  cursor: default;
+}
+
+@media print {
+  .toolbar,
+  .editor { display: none !important; }
+}

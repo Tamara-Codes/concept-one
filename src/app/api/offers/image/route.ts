@@ -1,8 +1,6 @@
 import { GetObjectCommand } from "@aws-sdk/client-s3";
-import { eq } from "drizzle-orm";
 import { getAllowedOfferUser } from "@/lib/offer-access";
-import { getDb } from "@/lib/db";
-import { offerItems } from "@/lib/db/schema";
+import { isOfferImageReferenced } from "@/lib/offer-image-references";
 import { getR2BucketName, getR2Client } from "@/lib/storage/r2";
 import { InvalidOfferImageError, MAX_IMAGE_BYTES, saveOfferImage } from "@/lib/offer-images";
 
@@ -31,10 +29,8 @@ export async function GET(request: Request) {
   const key = new URL(request.url).searchParams.get("key");
   if (!key) return new Response(null, { status: 400 });
 
-  const [item] = await getDb().select({ imageKey: offerItems.imageKey }).from(offerItems).where(eq(offerItems.imageKey, key)).limit(1);
-  if (!item) return new Response(null, { status: 404 });
-
   try {
+    if (!await isOfferImageReferenced(key)) return new Response(null, { status: 404 });
     const object = await getR2Client().send(new GetObjectCommand({ Bucket: getR2BucketName(), Key: key }));
     if (!object.Body) return new Response(null, { status: 404 });
     const bytes = await object.Body.transformToByteArray();
