@@ -4,6 +4,7 @@ import { useState, type Dispatch, type ReactNode, type SetStateAction } from "re
 import { offerImageUrl } from "@/lib/offer-image-client";
 import type { ArchivedPresentations, TechnicalPresentation } from "@/lib/technical-presentations";
 import styles from "./TechnicalPresentations.module.css";
+import PresentationPicker from "./PresentationPicker";
 
 export type PresentationDraft = TechnicalPresentation & {
   id: string;
@@ -130,22 +131,7 @@ export default function TechnicalPresentations({
             )}
             {!loadingArchive && archive.length > 0 && (
               <>
-                <label className={styles.archiveField}>
-                  Odaberite tehničku prezentaciju
-                  <select className={styles.input}
-                    value={selectedPage} disabled={disabled} onChange={(event) => setSelectedPage(event.target.value)}>
-                    <option value="">Odaberite stranicu…</option>
-                    {archive.map((offer) => (
-                      <optgroup key={offer.id} label={[offer.offerNumber, offer.clientName].filter(Boolean).join(" · ")}>
-                        {offer.presentations.map((page, index) => (
-                          <option key={index} value={`${offer.id}:${index}`}>
-                            {index + 1}. {page.title.trim() || "Tehnička prezentacija"}
-                          </option>
-                        ))}
-                      </optgroup>
-                    ))}
-                  </select>
-                </label>
+                <PresentationPicker archive={archive} value={selectedPage} onChange={setSelectedPage} disabled={disabled} />
                 <button type="button" className={styles.primaryButton} disabled={disabled || !selectedPage} onClick={copyPage}>
                   {busy ? "Učitavam…" : "Kopiraj stranicu"}
                 </button>

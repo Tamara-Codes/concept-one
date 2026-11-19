@@ -55,8 +55,7 @@
   font-family: "Manrope", system-ui, sans-serif;
 }
 
-.field,
-.archiveField {
+.field {
   display: grid;
   gap: 8px;
   min-width: 0;
@@ -65,8 +64,6 @@
   font-weight: 600;
   line-height: 1.5;
 }
-
-.archiveField { flex: 1 1 280px; }
 
 .input {
   box-sizing: border-box;
@@ -145,6 +142,88 @@
   opacity: 0.55;
   cursor: default;
 }
+
+.picker {
+  position: relative;
+  flex: 1 1 280px;
+  min-width: 0;
+}
+
+.pickerLabel {
+  display: block;
+  margin-bottom: 8px;
+  color: #54595d;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pickerTrigger {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  width: 100%;
+  min-height: 48px;
+  border: 1px solid #d8dad5;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fff;
+  color: #202225;
+  text-align: left;
+  font: 500 14px/1.5 "Manrope", system-ui, sans-serif;
+  cursor: pointer;
+}
+
+.pickerTrigger:hover { border-color: #b5945f; }
+.pickerTrigger[aria-expanded="true"] { border-color: #b5945f; background: #fcfaf6; }
+.pickerTrigger:disabled { opacity: 0.55; cursor: default; }
+.pickerSelection { display: grid; gap: 3px; min-width: 0; overflow-wrap: anywhere; }
+.pickerSelection small { color: #777d76; font-size: 11px; font-weight: 400; }
+.pickerChevron { color: #8a6a3b; font-size: 22px; line-height: 1; }
+
+.pickerPanel {
+  position: absolute;
+  inset: calc(100% + 8px) 0 auto;
+  z-index: 20;
+  overflow: hidden;
+  border: 1px solid #dedbd3;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 12px 36px #20222526;
+}
+
+.pickerSearch { padding: 12px; border-bottom: 1px solid #eeede8; }
+.pickerSearch .input { padding: 9px 12px; font-size: 13px; background: #f7f8f5; }
+.pickerResults { max-height: 300px; overflow-y: auto; overscroll-behavior: contain; padding: 6px; }
+.pickerGroup + .pickerGroup { border-top: 1px solid #eeede8; margin-top: 6px; padding-top: 6px; }
+.pickerGroupHeading { display: grid; gap: 2px; padding: 10px 12px 6px; overflow-wrap: anywhere; }
+.pickerGroupHeading strong { color: #8a6a3b; font-size: 11px; letter-spacing: 0.04em; }
+.pickerGroupHeading > span { color: #777d76; font-size: 11px; line-height: 1.5; }
+
+.pickerOption {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  box-sizing: border-box;
+  width: 100%;
+  border: 0;
+  border-radius: 6px;
+  padding: 11px 12px;
+  background: #fff;
+  color: #202225;
+  font: 500 13px/1.5 "Manrope", system-ui, sans-serif;
+  text-align: left;
+  overflow-wrap: anywhere;
+  cursor: pointer;
+}
+
+.pickerOption:hover { background: #f3f4f2; }
+.pickerOption[aria-pressed="true"] { background: #f4eee2; }
+.pickerCheck { flex-shrink: 0; color: #8a6a3b; }
+.pickerTrigger:focus-visible,
+.pickerOption:focus-visible { outline: 2px solid #b5945f; outline-offset: -2px; }
+.pickerEmpty { margin: 0; padding: 20px 12px; color: #777d76; font-size: 13px; }
 
 @media print {
   .toolbar,
