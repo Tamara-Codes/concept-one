@@ -12,7 +12,7 @@ export const site = {
       name: "Ivica",
       phone: "+385915085666",
       phoneDisplay: "+385 91 508 5666",
-      email: "ivica@conceptone.hr",
+      email: "info@conceptone.hr",
     },
   ],
   street: "Ćikovići 128",

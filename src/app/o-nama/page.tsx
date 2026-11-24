@@ -35,6 +35,10 @@ const brands = [
   { name: "Medle", image: "/images/brands/medle.png" },
   { name: "Hörmann", image: "/images/brands/hormann.png" },
   { name: "Déco", image: "/images/offer/brand-deco.png" },
+  { name: "LIP BLED", image: "/images/offer/brand-lip-bled.png" },
+  { name: "GD Dorigo", image: "/images/offer/brand-gd-dorigo.png" },
+  { name: "Dierre", image: "/images/offer/brand-dierre.png" },
+  { name: "Enterijer Massiv", image: "/images/offer/brand-enterijer-massiv.png" },
 ];
 
 export default function ONamaPage() {
