@@ -195,14 +195,12 @@ export default function HomePage() {
       <section className="relative py-16 sm:py-28 lg:py-36 bg-co-warm">
         <div className="relative z-10 max-w-3xl mx-auto px-6 text-center">
           <h2 className="font-serif text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-light text-co-charcoal leading-tight mb-6">
-            Kontaktirajte
-            <br />
-            <span className="italic font-medium">naš tim</span>
+            Kontaktirajte nas
           </h2>
           <p className="font-sans text-base text-co-charcoal/60 mb-10 leading-relaxed">
             Stojimo vam na raspolaganju za savjete, izmjeru i ponudu.
           </p>
-          <div className="grid max-w-sm mx-auto gap-4 sm:gap-6 text-left">
+          <div className="grid max-w-sm mx-auto gap-4 sm:gap-6 text-center">
             {site.contacts.map((contact) => (
               <div key={contact.email} className="border border-co-charcoal/10 bg-white/40 p-5 sm:p-6">
                 <p className="font-sans text-xs tracking-widest uppercase text-co-charcoal/50 mb-3">{contact.name}</p>
