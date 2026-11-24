@@ -202,10 +202,10 @@ export default function HomePage() {
           <p className="font-sans text-base text-co-charcoal/60 mb-10 leading-relaxed">
             Stojimo vam na raspolaganju za savjete, izmjeru i ponudu.
           </p>
-          <div className="grid sm:grid-cols-2 gap-4 sm:gap-6 text-left">
+          <div className="grid max-w-sm mx-auto gap-4 sm:gap-6 text-left">
             {site.contacts.map((contact) => (
               <div key={contact.email} className="border border-co-charcoal/10 bg-white/40 p-5 sm:p-6">
-                <p className="font-sans text-xs tracking-widest uppercase text-co-charcoal/50 mb-3">{contact.name} · {contact.specialty}</p>
+                <p className="font-sans text-xs tracking-widest uppercase text-co-charcoal/50 mb-3">{contact.name}</p>
                 <a href={`tel:${contact.phone}`} className="block font-serif text-2xl sm:text-3xl font-light text-co-charcoal hover:text-co-accent-dark transition-colors duration-300">
                   {contact.phoneDisplay}
                 </a>

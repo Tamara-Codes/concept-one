@@ -10,17 +10,9 @@ export const site = {
   contacts: [
     {
       name: "Ivica",
-      specialty: "vanjska bravarija",
       phone: "+385915085666",
       phoneDisplay: "+385 91 508 5666",
       email: "ivica@conceptone.hr",
-    },
-    {
-      name: "Saša",
-      specialty: "unutarnja stolarija",
-      phone: "+385976074608",
-      phoneDisplay: "+385 97 607 4608",
-      email: "sasa@conceptone.hr",
     },
   ],
   street: "Ćikovići 128",

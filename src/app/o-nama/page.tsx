@@ -181,7 +181,7 @@ export default function ONamaPage() {
                   <div className="space-y-3 font-sans text-base text-white/70">
                     {site.contacts.map((contact) => (
                       <div key={contact.email}>
-                        <p className="text-white/40">{contact.name} — {contact.specialty}</p>
+                        <p className="text-white/40">{contact.name}</p>
                         <a href={`tel:${contact.phone}`} className="block hover:text-co-accent transition-colors">{contact.phoneDisplay}</a>
                         <a href={`mailto:${contact.email}`} className="block hover:text-co-accent transition-colors">{contact.email}</a>
                       </div>
