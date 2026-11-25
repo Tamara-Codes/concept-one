@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState, type ClipboardEvent } from "react";
 import Image from "next/image";
 import { site } from "@/data/site";
 import { offerImageUrl, uploadOfferImage } from "@/lib/offer-image-client";
@@ -276,6 +276,7 @@ export default function PonudaForm({
   const [coEmail, setCoEmail] = useState(initialOffer?.coEmail ?? site.contacts[0].email);
 
   const [items, setItems] = useState<Item[]>(initialOffer?.items?.length ? initialOffer.items.map((item) => ({ ...newItem(), id: crypto.randomUUID(), desc: item.description, imageKey: item.imageKey ?? "", imageContentType: item.imageContentType ?? "", imageSrc: item.imageKey ? offerImageUrl(item.imageKey) : "", imageName: item.imageName ?? "", qty: Number(item.quantity), price: Number(item.unitPrice), discountPct: Number(item.discountPct), dimensions: item.dimensions, isSurcharge: item.isSurcharge })) : [newItem()]);
+  const [itemImageError, setItemImageError] = useState<{ id: string; message: string } | null>(null);
   const [presentations, setPresentations] = useState<PresentationDraft[]>(() => initialPresentations.map((page, index) => ({
     ...page, id: `presentation-${index}`, imageData: "",
   })));
@@ -372,16 +373,47 @@ export default function PonudaForm({
     });
   }
 
-  function pasteImageIntoRow(id: string, file: File) {
+  function pasteImageIntoRow(id: string, file: Blob, name = "Slika proizvoda") {
+    if (!["image/png", "image/jpeg", "image/webp", "image/gif"].includes(file.type) || !file.size || file.size > 4 * 1024 * 1024) {
+      setItemImageError({ id, message: "Slika mora biti PNG, JPEG, WebP ili GIF do 4 MB." });
+      return;
+    }
+    setItemImageError(null);
     const reader = new FileReader();
     reader.onload = () =>
       updateItem(id, {
         imageSrc: String(reader.result),
         imageKey: "",
         imageContentType: file.type,
-        imageName: file.name || "Slika proizvoda",
+        imageName: name,
       });
+    reader.onerror = () => setItemImageError({ id, message: "Slika se nije mogla učitati. Pokušajte ponovno." });
     reader.readAsDataURL(file);
+  }
+
+  function handleItemImagePaste(event: ClipboardEvent<HTMLTableRowElement>, item: Item) {
+    if (item.isSurcharge) return;
+    const image = Array.from(event.clipboardData.items)
+      .find((entry) => entry.kind === "file" && entry.type.startsWith("image/"))?.getAsFile();
+    if (!image) return;
+    event.preventDefault();
+    pasteImageIntoRow(item.id, image, image.name || "Slika proizvoda");
+  }
+
+  async function readItemImageClipboard(id: string) {
+    try {
+      const clipboard = await navigator.clipboard.read();
+      for (const entry of clipboard) {
+        const type = entry.types.find((value) => value.startsWith("image/"));
+        if (type) {
+          pasteImageIntoRow(id, await entry.getType(type));
+          return;
+        }
+      }
+      setItemImageError({ id, message: "Prvo kopirajte sliku, zatim ovdje pritisnite Ctrl+V." });
+    } catch {
+      setItemImageError({ id, message: "Za lijepljenje kopirane slike ovdje pritisnite Ctrl+V." });
+    }
   }
 
   const lineTotals = useMemo(
@@ -713,19 +745,19 @@ export default function PonudaForm({
         <table className="d3-table">
           <colgroup>
             <col className="d3-col-rbr" />
+            <col className="d3-col-image" />
             <col />
-            <col className="d3-col-dim" />
+            <col className="d3-col-qty" />
             <col className="d3-col-num" />
-            <col className="d3-col-num" />
-            <col className="d3-col-num" />
+            <col className="d3-col-discount" />
             <col className="d3-col-total" />
             <col className="no-print d3-col-actions" />
           </colgroup>
           <thead>
             <tr>
               <th>R.br.</th>
-              <th>Opis</th>
-              <th>Dimenzije</th>
+              <th>Slika / nacrt</th>
+              <th>Opis i dimenzije</th>
               <th className="num">Kol.</th>
               <th className="num">Cijena &euro;</th>
               <th className="num">Rabat %</th>
@@ -735,9 +767,35 @@ export default function PonudaForm({
           </thead>
           <tbody>
             {items.map((it, i) => (
-              <tr key={it.id} className={it.isSurcharge ? "d3-row-surcharge" : undefined}>
+              <tr key={it.id} className={it.isSurcharge ? "d3-row-surcharge" : undefined}
+                onPasteCapture={(event) => handleItemImagePaste(event, it)}>
                 <td className="d3-rbr">{i + 1}</td>
-                <td>
+                {!it.isSurcharge && <td className="d3-imagecell">
+                  <button type="button"
+                    className={`no-print d3-image-paste${it.imageSrc ? " d3-image-paste-filled" : ""}`}
+                    aria-label={`${it.imageSrc ? "Zamijeni" : "Zalijepi"} sliku stavke ${i + 1}`}
+                    title="Klikni za lijepljenje ili ovdje pritisni Ctrl+V"
+                    onClick={() => void readItemImageClipboard(it.id)}>
+                    {it.imageSrc ? <img src={it.imageSrc} alt={it.imageName || "Slika proizvoda"} className="d3-item-image" /> : <>
+                      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                        <rect x="3" y="3" width="18" height="18" rx="2" stroke="currentColor" strokeWidth="1.4" />
+                        <circle cx="8" cy="8" r="2" stroke="currentColor" strokeWidth="1.4" />
+                        <path d="m3 17 5-5 4 4 4-6 5 7" stroke="currentColor" strokeWidth="1.4" />
+                      </svg>
+                      <span>Zalijepi sliku</span><small>Ctrl+V</small>
+                    </>}
+                  </button>
+                  {it.imageSrc && <>
+                    <img src={it.imageSrc} alt={it.imageName || "Slika proizvoda"} className="d3-item-image d3-item-image-print" />
+                    <button type="button" className="no-print d3-item-image-remove"
+                      aria-label={`Ukloni sliku stavke ${i + 1}`}
+                      onClick={() => { updateItem(it.id, { imageSrc: "", imageKey: "", imageContentType: "", imageName: "" }); setItemImageError(null); }}>
+                      Ukloni sliku
+                    </button>
+                  </>}
+                  {itemImageError?.id === it.id && <p role="alert" className="no-print d3-image-error">{itemImageError.message}</p>}
+                </td>}
+                <td colSpan={it.isSurcharge ? 2 : 1}>
                   {it.isSurcharge && <div className="d3-surchargetag">Nadoplata</div>}
                   <textarea
                     ref={(el) => {
@@ -753,50 +811,35 @@ export default function PonudaForm({
                       e.target.style.height = `${e.target.scrollHeight}px`;
                     }}
                     onPaste={(e) => {
-                      const imageFile = Array.from(e.clipboardData.items)
-                        .find((item) => item.kind === "file" && item.type.startsWith("image/"))
-                        ?.getAsFile();
-                      if (imageFile && !it.isSurcharge) {
-                        e.preventDefault();
-                        pasteImageIntoRow(it.id, imageFile);
-                        return;
-                      }
+                      if (e.defaultPrevented) return;
                       const text = e.clipboardData.getData("text/plain");
-                      if (!text.includes("\t") && !text.includes("\n")) return;
+                      if (!text.includes("\t")) return;
                       e.preventDefault();
                       pasteIntoRow(it.id, it.isSurcharge, text);
                     }}
                     placeholder={
-                      it.isSurcharge ? "Opis nadoplate" : "Opis proizvoda / usluge — zalijepi tekst ili sliku"
+                      it.isSurcharge ? "Opis nadoplate" : "Tip profila, boja, staklo, okov, dodatci…"
                     }
+                    aria-label={`Opis stavke ${i + 1}`}
                     rows={1}
                     className={
                       it.isSurcharge
-                        ? "field d3-name d3-name-surcharge w-full resize-none block overflow-hidden"
-                        : "field d3-name w-full resize-none block overflow-hidden"
+                        ? "no-print field d3-name d3-name-surcharge w-full resize-none block overflow-hidden"
+                        : "no-print field d3-name w-full resize-none block overflow-hidden"
                     }
                   />
-                  {it.imageSrc && !it.isSurcharge && (
-                    <div className="d3-item-image-wrap">
-                      <img src={it.imageSrc} alt={it.imageName || "Slika proizvoda"} className="d3-item-image" />
-                      <button
-                        type="button"
-                        className="no-print d3-item-image-remove"
-                        onClick={() => updateItem(it.id, { imageSrc: "", imageKey: "", imageContentType: "", imageName: "" })}
-                      >
-                        Ukloni sliku
-                      </button>
-                    </div>
-                  )}
-                </td>
-                <td>
+                  <div className="d3-item-description-print d3-name">{it.desc}</div>
                   {!it.isSurcharge && (
+                    <>
                     <input
                       value={it.dimensions}
                       onChange={(e) => updateItem(it.id, { dimensions: e.target.value })}
-                      placeholder="95 x 210 x 18 cm"
-                      className="field w-full"
+                      placeholder="Dimenzije: 95 × 210 cm"
+                      aria-label={`Dimenzije stavke ${i + 1}`}
+                      className="no-print field d3-item-dimensions w-full"
                     />
+                    {it.dimensions && <div className="d3-item-description-print d3-item-dimensions"><strong>Dimenzije: </strong>{it.dimensions}</div>}
+                    </>
                   )}
                 </td>
                 <td className="num">
@@ -1573,16 +1616,22 @@ export default function PonudaForm({
           table-layout: fixed;
         }
         .d3-col-rbr {
-          width: 30px;
+          width: 34px;
         }
-        .d3-col-dim {
-          width: 130px;
+        .d3-col-image {
+          width: 36mm;
+        }
+        .d3-col-qty {
+          width: 36px;
         }
         .d3-col-num {
-          width: 66px;
+          width: 62px;
+        }
+        .d3-col-discount {
+          width: 46px;
         }
         .d3-col-total {
-          width: 78px;
+          width: 74px;
         }
         .d3-col-actions {
           width: 82px;
@@ -1611,13 +1660,26 @@ export default function PonudaForm({
         .d3-table td.num {
           text-align: right;
         }
+        .d3-table input[type="number"] {
+          appearance: textfield;
+          -moz-appearance: textfield;
+        }
+        .d3-table input[type="number"]::-webkit-inner-spin-button,
+        .d3-table input[type="number"]::-webkit-outer-spin-button {
+          -webkit-appearance: none;
+          margin: 0;
+        }
         .d3-actionscell {
-          display: flex;
-          align-items: center;
-          justify-content: center;
-          gap: 5px;
+          text-align: center;
+          white-space: nowrap;
           padding: 4px !important;
           border: none !important;
+        }
+        .d3-actionscell .d3-iconbtn + .d3-iconbtn {
+          margin-left: 3px;
+        }
+        .d3-actionscell .d3-iconbtn {
+          display: inline-flex;
         }
         .d3-rbr {
           text-align: center;
@@ -1629,20 +1691,67 @@ export default function PonudaForm({
           font-size: 13.5px;
           font-weight: 500;
           color: var(--ink);
+          line-height: 1.4;
+          overflow-wrap: anywhere;
         }
         .d3-name::placeholder {
           color: var(--muted);
           font-weight: 400;
         }
-        .d3-item-image-wrap {
-          margin-top: 6px;
+        .d3-image-paste {
+          display: flex;
+          width: 100%;
+          align-items: center;
+          justify-content: center;
+          flex-wrap: wrap;
+          gap: 4px 6px;
+          padding: 6px;
+          border: 1px dashed var(--line);
+          border-radius: 4px;
+          color: var(--muted);
+          cursor: pointer;
+          font-size: 11px;
+        }
+        .d3-image-paste small {
+          font-size: 10px;
+        }
+        .d3-image-paste:hover,
+        .d3-image-paste:focus-visible {
+          border-color: var(--accent);
+          outline: 1px solid var(--accent);
+        }
+        .d3-image-paste-filled {
+          padding: 0;
+          border: 0;
+          border-radius: 0;
+          justify-content: flex-start;
         }
         .d3-item-image {
           display: block;
+          width: auto;
+          height: auto;
           max-width: 100%;
-          max-height: 34mm;
+          max-height: 40mm;
           object-fit: contain;
           object-position: left top;
+        }
+        .d3-item-image-print,
+        .d3-item-description-print {
+          display: none;
+        }
+        .d3-item-description-print {
+          white-space: pre-wrap;
+          overflow-wrap: anywhere;
+        }
+        .d3-item-dimensions {
+          margin-top: 5px;
+          font-size: 11px;
+          color: var(--muted);
+        }
+        .d3-image-error {
+          margin: 4px 0 0;
+          font-size: 10px;
+          color: #b3261e;
         }
         .d3-item-image-remove {
           margin-top: 4px;
@@ -1895,6 +2004,52 @@ export default function PonudaForm({
             box-shadow: none !important;
             max-width: none !important;
             width: 210mm;
+          }
+          @page offer-items {
+            size: A4;
+            margin: 14mm 16mm;
+          }
+          .offer-form-page.sheet {
+            page: offer-items;
+            width: auto;
+            min-height: 0;
+            padding: 0;
+          }
+          .d3-tablewrap {
+            overflow: visible;
+          }
+          .d3-table {
+            min-width: 0;
+          }
+          .d3-table thead {
+            display: table-header-group;
+          }
+          .d3-table tbody {
+            break-inside: auto;
+          }
+          .d3-table tr {
+            break-inside: avoid;
+            page-break-inside: avoid;
+          }
+          .d3-table th {
+            font-size: 8px;
+            padding: 5px 4px;
+          }
+          .d3-table td {
+            padding: 4px;
+          }
+          .d3-item-image-print,
+          .d3-item-description-print {
+            display: block;
+          }
+          .d3-name {
+            font-size: 11px;
+          }
+          .d3-item-dimensions {
+            font-size: 10px;
+          }
+          .d3-totals {
+            break-inside: avoid;
           }
         }
       `}</style>
