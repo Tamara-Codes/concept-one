@@ -636,7 +636,10 @@ export default function PonudaForm({
             <ul>
               <li>Aluminijsku bravariju</li>
               <li>PVC stolariju</li>
+              <li>Drvene prozore i vrata</li>
               <li>Ulazna vrata</li>
+              <li>Protivprovalna vrata</li>
+              <li>Protupožarna vrata</li>
               <li>Sobna vrata</li>
               <li>Garažna vrata</li>
               <li>Zaštitu od sunca</li>
