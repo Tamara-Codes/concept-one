@@ -638,7 +638,7 @@ export default function PonudaForm({
               <li>PVC stolariju</li>
               <li>Drvene prozore i vrata</li>
               <li>Ulazna vrata</li>
-              <li>Protivprovalna vrata</li>
+              <li>Protuprovalna vrata</li>
               <li>Protupožarna vrata</li>
               <li>Sobna vrata</li>
               <li>Garažna vrata</li>
